@@ -2,6 +2,14 @@
  * Edge-compatible auth config — no Prisma, no heavy providers.
  * Used only by middleware. The full auth.ts spreads this and adds
  * the Prisma adapter, Resend provider, and jwt/session callbacks.
+ *
+ * Why session callback here:
+ *   next-auth's getSession() (used in middleware) strips the JWT payload
+ *   down to { name, email, image } before calling callbacks.session.
+ *   Without explicitly mapping token.role → session.user.role here, the
+ *   authorized callback sees role=undefined and bounces admins in a loop:
+ *     /dashboard → (member layout) → /admin/dashboard
+ *     /admin/dashboard → (middleware, role=undefined) → /dashboard → ∞
  */
 import type { NextAuthConfig } from "next-auth"
 
@@ -21,6 +29,14 @@ export const authConfig = {
     error: "/login",
   },
   callbacks: {
+    // Propagate role into the session so middleware can see it.
+    // This callback is edge-safe (no Prisma). The full auth.ts overrides
+    // it to also add memberId.
+    session({ session, token }) {
+      session.user.role = (token.role as "admin" | "member") ?? "member"
+      return session
+    },
+
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
       const { pathname } = nextUrl
