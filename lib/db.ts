@@ -5,7 +5,12 @@ import { Pool } from "pg"
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 function createPrismaClient() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    // Explicitly opt in to verify-full so pg v9 doesn't change behavior under us.
+    // Neon requires TLS; rejectUnauthorized: true is the verify-full equivalent.
+    ssl: { rejectUnauthorized: true },
+  })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
