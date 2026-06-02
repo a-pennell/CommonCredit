@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import Link from "next/link"
 import { signOut } from "@/lib/auth"
 import type { Route } from "next"
@@ -7,6 +6,7 @@ interface SidebarProps {
   role: "admin" | "member"
   userName: string | null | undefined
   userEmail: string | null | undefined
+  pendingCount?: number
 }
 
 const memberNav = [
@@ -24,7 +24,7 @@ const adminNav = [
   { href: "/admin/transactions", label: "Transactions" },
 ]
 
-export function Sidebar({ role, userName, userEmail }: SidebarProps) {
+export function Sidebar({ role, userName, userEmail, pendingCount }: SidebarProps) {
   const nav = role === "admin" ? adminNav : memberNav
 
   return (
@@ -43,24 +43,37 @@ export function Sidebar({ role, userName, userEmail }: SidebarProps) {
 
       {/* Nav links */}
       <nav className="flex-1 space-y-0.5 px-2 py-3">
-        {nav.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href as Route}
-            className="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
-          >
-            {label}
-          </Link>
-        ))}
+        {nav.map(({ href, label }) => {
+          const showBadge =
+            role === "admin" &&
+            href === "/admin/applications" &&
+            pendingCount != null &&
+            pendingCount > 0
+
+          return (
+            <Link
+              key={href}
+              href={href as Route}
+              className="flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
+            >
+              {label}
+              {showBadge && (
+                <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                  {pendingCount}
+                </span>
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* User + sign-out */}
       <div className="border-t border-gray-200 p-3">
         <div className="mb-2 px-1">
-          <p className="text-xs font-medium text-gray-900 truncate">
+          <p className="truncate text-xs font-medium text-gray-900">
             {userName ?? "Admin"}
           </p>
-          <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+          <p className="truncate text-xs text-gray-500">{userEmail}</p>
         </div>
         <form
           action={async () => {
