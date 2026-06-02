@@ -1,0 +1,900 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum MemberType {
+  INDIVIDUAL
+  BUSINESS
+  COOPERATIVE
+  NONPROFIT
+  ANCHOR
+}
+
+enum MemberStatus {
+  PENDING    // Application submitted, awaiting review
+  APPROVED   // Active member in good standing
+  SUSPENDED  // Temporary sanction (≤90 days)
+  INACTIVE   // No recent activity; not sanctioned
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DEFERRED
+  WITHDRAWN
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN   // Admin-placed hold during dispute
+  CLOSED   // Cooperative board action only
+}
+
+enum TransactionStatus {
+  DRAFT      // Created, not yet confirmed
+  PENDING    // Awaiting payee confirmation (Phase 2+)
+  POSTED     // Ledger entries written; immutable
+  REVERSED   // Offset entries created; original entries intact
+  DISPUTED   // Flagged; does not affect posted status
+}
+
+enum OfferStatus {
+  DRAFT
+  PUBLISHED
+  CLAIMED    // Buyer expressed intent (Phase 2+)
+  FULFILLED
+  UNPUBLISHED
+  EXPIRED
+}
+
+enum NeedStatus {
+  DRAFT
+  PUBLISHED
+  RESPONDED  // A member offered to meet it
+  FULFILLED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  APPROVED   // Triggers Transaction.post
+  REJECTED
+  CANCELLED
+  PAID       // Set after transaction posts
+  OVERDUE
+}
+
+enum DisputeType {
+  TRANSACTION_DISPUTE
+  SERVICE_QUALITY
+  NON_DELIVERY
+  HARASSMENT_SAFETY
+  CREDIT_ABUSE
+}
+
+enum DisputeStatus {
+  OPEN
+  EVIDENCE_GATHERING
+  MEDIATION
+  DECIDED
+  APPEALED
+  CLOSED
+}
+
+enum SanctionType {
+  WARNING
+  LIMIT_REDUCTION
+  SUSPENSION
+  // PERMANENT_REMOVAL is a cooperative board action outside this system — never auto-applied
+}
+
+enum CreditLimitRequestStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DENIED
+  APPEALED
+  WITHDRAWN
+}
+
+// Phase 3+
+enum ProposalStatus {
+  DRAFT
+  COMMENT_PERIOD
+  VOTING
+  ENACTED
+  FAILED
+  ARCHIVED
+}
+
+enum VoteChoice {
+  YES
+  NO
+  ABSTAIN
+}
+
+enum TreasuryAllocationStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectTaskStatus {
+  OPEN
+  CLAIMED
+  SUBMITTED
+  VERIFIED
+  PAID
+  REJECTED
+}
+
+enum ResourceStatus {
+  ACTIVE
+  UNAVAILABLE
+  DECOMMISSIONED
+}
+
+enum NotificationType {
+  TRANSACTION_CONFIRMED
+  TRANSACTION_REVERSED
+  INVOICE_RECEIVED
+  INVOICE_APPROVED
+  INVOICE_REJECTED
+  INVOICE_OVERDUE
+  STATEMENT_READY
+  TAX_SUMMARY_READY
+  APPLICATION_APPROVED
+  APPLICATION_REJECTED
+  DISPUTE_OPENED
+  DISPUTE_DECIDED
+  CREDIT_LIMIT_DECIDED
+  PROPOSAL_PUBLISHED    // Phase 3+
+  VOTING_OPENED         // Phase 3+
+  VOTING_CLOSED         // Phase 3+
+}
+
+enum AuditAction {
+  CREDIT_LIMIT_ADJUSTED
+  DEBIT_LIMIT_ADJUSTED
+  MEMBER_APPROVED
+  MEMBER_REJECTED
+  MEMBER_SUSPENDED
+  MEMBER_REINSTATED
+  TRANSACTION_REVERSED
+  DISPUTE_SANCTIONED
+  ACCOUNT_FROZEN
+  ACCOUNT_UNFROZEN
+}
+
+// ============================================================
+// MEMBERSHIP
+// ============================================================
+
+model Member {
+  id        String       @id @default(cuid())
+  type      MemberType
+  name      String
+  email     String       @unique
+  bio       String?
+  location  String?
+  website   String?
+  status    MemberStatus @default(PENDING)
+  joinedAt  DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  application          MembershipApplication?
+  account              Account?
+  offers               Offer[]
+  needs                Need[]
+  sentInvoices         Invoice[]              @relation("InvoiceSeller")
+  receivedInvoices     Invoice[]              @relation("InvoiceBuyer")
+  reputationGiven      ReputationEvent[]      @relation("ReputationFrom")
+  reputationReceived   ReputationEvent[]      @relation("ReputationTo")
+  endorsementsGiven    Endorsement[]          @relation("EndorsementFrom")
+  endorsementsReceived Endorsement[]          @relation("EndorsementTo")
+  openedDisputes       Dispute[]              @relation("DisputeOpener")
+  creditLimitRequests  CreditLimitRequest[]
+  proposals            Proposal[]             // Phase 3+
+  votes                Vote[]                 // Phase 3+
+  claimedTasks         ProjectTask[]          // Phase 3+
+  stewardedResources   CommonsResource[]      // Phase 3+
+  bookings             BookingRecord[]        // Phase 3+
+  notifications        Notification[]
+  actorAuditLogs       AuditLog[]             @relation("AuditActor")
+  subjectAuditLogs     AuditLog[]             @relation("AuditSubject")
+
+  @@index([email])
+  @@index([status])
+}
+
+model MembershipApplication {
+  id        String            @id @default(cuid())
+  memberId  String            @unique
+  member    Member            @relation(fields: [memberId], references: [id])
+
+  // Onboarding questionnaire (from spec section 16)
+  offerSummary    String   // Required: what they offer
+  needsSummary    String?
+  unusedCapacity  String?
+  cashEquivalent  String?  // What they currently pay cash for that a member could provide
+  creditPercent   Int?     // % of payment they could accept in credits
+  localTrust      String?  // Who they already trust locally
+  referredBy      String?  // Member ID or name who endorsed them
+
+  status       ApplicationStatus @default(SUBMITTED)
+  adminNote    String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime          @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================================
+// LEDGER — CORE DOMAIN
+// Invariants enforced in lib/ledger.ts and via DB constraints:
+//   1. Every Transaction produces exactly 2 LedgerEntry rows
+//   2. Σ(all LedgerEntry.credit - LedgerEntry.debit) = 0 across the network
+//   3. Account.balance = Σ(credit) - Σ(debit) for that account
+//   4. balance >= debitLimit at all times
+//   5. balance <= creditLimit at all times
+// ============================================================
+
+model Account {
+  id          String        @id @default(cuid())
+  memberId    String        @unique
+  member      Member        @relation(fields: [memberId], references: [id])
+
+  balance     Decimal       @default(0)    @db.Decimal(12, 2)
+  creditLimit Decimal       @default(500)  @db.Decimal(12, 2) // Max positive balance
+  debitLimit  Decimal       @default(-200) @db.Decimal(12, 2) // Max negative balance (negative number)
+
+  status      AccountStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  payerTransactions   Transaction[]      @relation("TransactionPayer")
+  payeeTransactions   Transaction[]      @relation("TransactionPayee")
+  ledgerEntries       LedgerEntry[]
+  creditLimitRequests CreditLimitRequest[]
+  statements          Statement[]
+  taxSummaries        TaxSummary[]
+
+  @@index([memberId])
+  @@index([status])
+}
+
+model Transaction {
+  id             String            @id @default(cuid())
+  payerAccountId String
+  payerAccount   Account           @relation("TransactionPayer", fields: [payerAccountId], references: [id])
+  payeeAccountId String
+  payeeAccount   Account           @relation("TransactionPayee", fields: [payeeAccountId], references: [id])
+
+  creditAmount    Decimal @db.Decimal(12, 2)          // Posts to ledger
+  cashAmount      Decimal @default(0) @db.Decimal(12, 2) // Memo only; never touches ledger
+  taxableValueUsd Decimal @db.Decimal(12, 2)          // creditAmount + cashAmount; 1 CC = 1 USD
+
+  description   String
+  status        TransactionStatus @default(POSTED)
+
+  // Identifies the upstream document that created this transaction
+  referenceType String?  // "INVOICE" | "DIRECT" | "PROJECT_TASK" | "ADMIN"
+  referenceId   String?
+
+  // Reversal chain — reversals offset, never delete
+  reversedById  String?   @unique // ID of the transaction that reverses this one
+  reversesId    String?   @unique // ID of the transaction this one is reversing
+  reversalReason String?
+
+  postedAt  DateTime  @default(now())
+  createdAt DateTime  @default(now())
+
+  ledgerEntries    LedgerEntry[]
+  reputationEvents ReputationEvent[]
+  dispute          Dispute?
+  invoice          Invoice?          @relation(fields: [referenceId], references: [id])
+
+  @@index([payerAccountId])
+  @@index([payeeAccountId])
+  @@index([status])
+  @@index([postedAt])
+  @@index([referenceId])
+}
+
+model LedgerEntry {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  accountId     String
+  account       Account     @relation(fields: [accountId], references: [id])
+
+  // Exactly one of debit or credit is non-zero per row
+  debit  Decimal @default(0) @db.Decimal(12, 2)
+  credit Decimal @default(0) @db.Decimal(12, 2)
+
+  // No updatedAt — immutable once posted
+  postedAt DateTime @default(now())
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@index([postedAt])
+}
+
+// ============================================================
+// EXCHANGE
+// ============================================================
+
+model Offer {
+  id          String      @id @default(cuid())
+  memberId    String
+  member      Member      @relation(fields: [memberId], references: [id])
+
+  title        String
+  category     String     // "wellness" | "creative" | "food" | "repair" | "professional" | "space" | "transport" | "other"
+  description  String
+  price        Decimal    @db.Decimal(12, 2)
+  priceUnit    String     @default("CC") // "CC" | "CC_PER_HOUR" | "NEGOTIABLE"
+  serviceArea  String?
+  availability String?    // Free text: "weekday mornings" etc.
+
+  status       OfferStatus @default(DRAFT)
+  availableUntil DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([memberId])
+  @@index([category])
+  @@index([status])
+}
+
+model Need {
+  id       String @id @default(cuid())
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  title       String
+  category    String
+  description String
+  urgency     String  @default("NORMAL") // "LOW" | "NORMAL" | "HIGH" | "URGENT"
+  neededBy    DateTime?
+
+  status    NeedStatus @default(DRAFT)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([memberId])
+  @@index([category])
+  @@index([status])
+}
+
+// ============================================================
+// INVOICING
+// ============================================================
+
+model Invoice {
+  id       String @id @default(cuid())
+  sellerId String
+  seller   Member @relation("InvoiceSeller", fields: [sellerId], references: [id])
+  buyerId  String
+  buyer    Member @relation("InvoiceBuyer", fields: [buyerId], references: [id])
+
+  creditAmount    Decimal @db.Decimal(12, 2)
+  cashAmount      Decimal @default(0) @db.Decimal(12, 2)
+  taxableValueUsd Decimal @db.Decimal(12, 2) // creditAmount + cashAmount
+
+  description  String
+  lineItems    Json?    // Optional structured breakdown
+  dueDate      DateTime?
+  status       InvoiceStatus @default(DRAFT)
+
+  rejectionNote String?
+
+  // Set after approval triggers transaction post
+  transactionId String? @unique
+
+  sentAt     DateTime?
+  approvedAt DateTime?
+  paidAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  transactions Transaction[] // Via referenceId on Transaction
+
+  @@index([sellerId])
+  @@index([buyerId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ============================================================
+// TRUST
+// ============================================================
+
+model ReputationEvent {
+  id             String      @id @default(cuid())
+  fromMemberId   String
+  fromMember     Member      @relation("ReputationFrom", fields: [fromMemberId], references: [id])
+  toMemberId     String
+  toMember       Member      @relation("ReputationTo", fields: [toMemberId], references: [id])
+  transactionId  String
+  transaction    Transaction @relation(fields: [transactionId], references: [id])
+
+  // Phase 1: single overall score
+  // Phase 2+: dimension-specific scores (one row per dimension)
+  dimension  String  @default("OVERALL") // "OVERALL" | "RELIABILITY" | "QUALITY" | "TIMELINESS" | "RECIPROCITY" | "COMMUNICATION"
+  score      Int     // 1–5
+  comment    String?
+
+  // Editing window: 48 hours only
+  editableUntil DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([fromMemberId, transactionId, dimension])
+  @@index([toMemberId])
+  @@index([transactionId])
+}
+
+model Endorsement {
+  id           String  @id @default(cuid())
+  fromMemberId String
+  fromMember   Member  @relation("EndorsementFrom", fields: [fromMemberId], references: [id])
+  toMemberId   String
+  toMember     Member  @relation("EndorsementTo", fields: [toMemberId], references: [id])
+
+  body      String
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([fromMemberId, toMemberId])
+  @@index([toMemberId])
+}
+
+// ============================================================
+// CREDIT LIMIT REQUESTS (Phase 2+)
+// ============================================================
+
+model CreditLimitRequest {
+  id        String @id @default(cuid())
+  memberId  String
+  member    Member @relation(fields: [memberId], references: [id])
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  requestedDebitLimit  Decimal @db.Decimal(12, 2)  // Proposed new debit limit (negative)
+  requestedCreditLimit Decimal @db.Decimal(12, 2)  // Proposed new credit limit
+
+  rationale      String  // Member's stated reason + repayment plan
+  tradeContext   String? // Summary of trade history member wants reviewed
+
+  status         CreditLimitRequestStatus @default(SUBMITTED)
+  reviewedById   String?  // Admin/committee member who decided
+  decisionReason String?  // Plain-language explanation sent to member
+  appealNote     String?
+
+  createdAt  DateTime  @default(now())
+  decidedAt  DateTime?
+
+  @@index([memberId])
+  @@index([status])
+}
+
+// ============================================================
+// DISPUTES
+// ============================================================
+
+model Dispute {
+  id            String      @id @default(cuid())
+  transactionId String      @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  openedById    String
+  openedBy      Member      @relation("DisputeOpener", fields: [openedById], references: [id])
+
+  type          DisputeType
+  status        DisputeStatus @default(OPEN)
+  assignedToId  String?       // Admin or committee member
+
+  evidence  DisputeEvidence[]
+  decisions DisputeDecision[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([openedById])
+}
+
+model DisputeEvidence {
+  id         String  @id @default(cuid())
+  disputeId  String
+  dispute    Dispute @relation(fields: [disputeId], references: [id])
+  submittedById String
+  // No FK to Member — evidence may be submitted by either party; store name as string for record
+
+  submitterName String
+  content       String
+  attachments   Json?   // Array of { name, url, mimeType }
+  createdAt     DateTime @default(now())
+
+  @@index([disputeId])
+}
+
+model DisputeDecision {
+  id        String  @id @default(cuid())
+  disputeId String
+  dispute   Dispute @relation(fields: [disputeId], references: [id])
+
+  decidedById   String   // Admin or committee member ID
+  decidedByName String   // Denormalized for audit record stability
+
+  decision  String       // Narrative decision
+  sanctionType SanctionType?
+  sanctionDetails String? // e.g. "debit limit reduced from -200 to -100 until 2026-09-01"
+
+  isAppealed  Boolean  @default(false)
+  appealNote  String?
+  appealedAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([disputeId])
+}
+
+// ============================================================
+// GOVERNANCE (Phase 3+)
+// ============================================================
+
+model Proposal {
+  id         String   @id @default(cuid())
+  proposerId String
+  proposer   Member   @relation(fields: [proposerId], references: [id])
+
+  title  String
+  body   String   // Rich text; locked once voting opens
+  status ProposalStatus @default(DRAFT)
+
+  // Voting configuration
+  quorumPercent   Int @default(30) // % of active members needed
+  passPercent     Int @default(60) // % of YES needed to pass
+
+  commentDeadline DateTime?
+  votingDeadline  DateTime?
+
+  // Tally (computed and stored on close)
+  totalVotes   Int?
+  yesVotes     Int?
+  noVotes      Int?
+  abstainVotes Int?
+  quorumMet    Boolean?
+  passed       Boolean?
+
+  votes       Vote[]
+  ruleChange  RuleChange?
+  allocations TreasuryAllocation[]
+  project     Project?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([proposerId])
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  proposalId String
+  proposal   Proposal @relation(fields: [proposalId], references: [id])
+  voterId    String
+  voter      Member   @relation(fields: [voterId], references: [id])
+
+  choice    VoteChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([proposalId, voterId])
+  @@index([proposalId])
+}
+
+model RuleChange {
+  id         String   @id @default(cuid())
+  proposalId String   @unique
+  proposal   Proposal @relation(fields: [proposalId], references: [id])
+
+  ruleKey       String  // e.g. "default_debit_limit" | "voting_quorum_percent"
+  previousValue String  // JSON-encoded previous value
+  newValue      String  // JSON-encoded new value
+  description   String  // Human-readable summary of what changed
+
+  enactedAt DateTime @default(now())
+
+  @@index([ruleKey])
+}
+
+// ============================================================
+// TREASURY & COMMONS (Phase 3+)
+// ============================================================
+
+model Treasury {
+  id   String @id @default(cuid())
+  name String @default("Network Treasury")
+
+  creditBalance Decimal @default(0) @db.Decimal(12, 2)
+  cashBalance   Decimal @default(0) @db.Decimal(12, 2)
+
+  allocations TreasuryAllocation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TreasuryAllocation {
+  id         String   @id @default(cuid())
+  treasuryId String
+  treasury   Treasury @relation(fields: [treasuryId], references: [id])
+  proposalId String
+  proposal   Proposal @relation(fields: [proposalId], references: [id])
+
+  amount    Decimal                  @db.Decimal(12, 2)
+  purpose   String
+  status    TreasuryAllocationStatus @default(PENDING)
+
+  releasedAt   DateTime?
+  cancelledAt  DateTime?
+  cancelReason String?
+
+  project Project?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([treasuryId])
+  @@index([status])
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  proposalId   String   @unique
+  proposal     Proposal @relation(fields: [proposalId], references: [id])
+  allocationId String   @unique
+  allocation   TreasuryAllocation @relation(fields: [allocationId], references: [id])
+
+  title       String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  tasks     ProjectTask[]
+  resources CommonsResource[] // Resources created by this project
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectTask {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  title        String
+  description  String?
+  creditValue  Decimal @db.Decimal(12, 2)
+
+  claimedById  String?
+  claimedBy    Member? @relation(fields: [claimedById], references: [id])
+
+  status         ProjectTaskStatus @default(OPEN)
+  submissionNote String?
+  verifiedById   String?
+  verifiedAt     DateTime?
+  paidAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model CommonsResource {
+  id        String @id @default(cuid())
+  name      String
+  type      String // "TOOL" | "SPACE" | "VEHICLE" | "EQUIPMENT" | "DIGITAL"
+  stewardId String
+  steward   Member @relation(fields: [stewardId], references: [id])
+
+  description  String?
+  accessRules  String?  // Who can book and under what conditions
+  creditCostPerHour Decimal? @db.Decimal(12, 2)
+
+  projectId String?  // Project that created this resource
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  status ResourceStatus @default(ACTIVE)
+
+  bookings       BookingRecord[]
+  maintenanceLogs MaintenanceLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([stewardId])
+  @@index([type])
+}
+
+model BookingRecord {
+  id         String          @id @default(cuid())
+  resourceId String
+  resource   CommonsResource @relation(fields: [resourceId], references: [id])
+  memberId   String
+  member     Member          @relation(fields: [memberId], references: [id])
+
+  startAt DateTime
+  endAt   DateTime
+  purpose String?
+  status  String  @default("CONFIRMED") // "CONFIRMED" | "CANCELLED" | "COMPLETED"
+
+  createdAt DateTime @default(now())
+
+  @@index([resourceId])
+  @@index([memberId])
+  @@index([startAt])
+}
+
+model MaintenanceLog {
+  id         String          @id @default(cuid())
+  resourceId String
+  resource   CommonsResource @relation(fields: [resourceId], references: [id])
+
+  performedById   String  // Member ID
+  performedByName String  // Denormalized for record stability
+  description     String
+  performedAt     DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([resourceId])
+}
+
+// ============================================================
+// REPORTING
+// ============================================================
+
+model Statement {
+  id        String  @id @default(cuid())
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  periodStart     DateTime
+  periodEnd       DateTime
+  openingBalance  Decimal @db.Decimal(12, 2)
+  closingBalance  Decimal @db.Decimal(12, 2)
+  totalDebits     Decimal @db.Decimal(12, 2)
+  totalCredits    Decimal @db.Decimal(12, 2)
+  transactionCount Int
+
+  generatedAt DateTime @default(now())
+  sentAt      DateTime?
+
+  @@unique([accountId, periodStart, periodEnd])
+  @@index([accountId])
+  @@index([periodStart])
+}
+
+model TaxSummary {
+  id        String  @id @default(cuid())
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  year                  Int
+  totalTaxableValueUsd  Decimal @db.Decimal(12, 2)
+  transactionCount      Int
+  disclaimer            String  @default("Credit transactions may have tax implications. Share this summary with your accountant.")
+
+  generatedAt DateTime @default(now())
+  sentAt      DateTime?
+
+  @@unique([accountId, year])
+  @@index([accountId])
+}
+
+model NetworkReport {
+  id String @id @default(cuid())
+
+  reportDate       DateTime
+  totalMembers     Int
+  activeMembers    Int      // Transacted in last 30 days
+  pendingMembers   Int
+
+  totalVolumeCC    Decimal @db.Decimal(12, 2)
+  totalVolumePeriod Decimal @db.Decimal(12, 2) // Since last report
+  velocityScore    Decimal @db.Decimal(5, 2)   // Avg transactions per active member
+
+  // Network health
+  reciprocityHealth Decimal @db.Decimal(5, 2)  // Ratio of two-way trading pairs
+  concentrationRisk Decimal @db.Decimal(5, 2)  // Gini coefficient of balances
+  stagnantAccounts  Int                         // No transactions in 90 days
+  openDisputes      Int
+
+  supplyGaps       Json?   // Array of { category, unmetNeedCount, offerCount }
+  aiNarrative      String? // Phase 4+: Claude-generated plain-language summary
+
+  generatedAt DateTime @default(now())
+
+  @@index([reportDate])
+}
+
+// ============================================================
+// AUDIT LOG
+// Append-only record of consequential admin and system actions
+// ============================================================
+
+model AuditLog {
+  id       String @id @default(cuid())
+  actorId  String
+  actor    Member @relation("AuditActor", fields: [actorId], references: [id])
+
+  // Subject is the entity being acted upon (may be a Member, Account, etc.)
+  subjectId   String?
+  subjectType String?  // "MEMBER" | "ACCOUNT" | "TRANSACTION" | "DISPUTE" etc.
+  subjectMemberId String?
+  subjectMember   Member? @relation("AuditSubject", fields: [subjectMemberId], references: [id])
+
+  action        AuditAction
+  previousValue String?    // JSON-encoded
+  newValue      String?    // JSON-encoded
+  reason        String     // Required for all audit log entries
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([subjectMemberId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id       String @id @default(cuid())
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  type    NotificationType
+  title   String
+  body    String
+  data    Json?    // Contextual data (transactionId, invoiceId, etc.)
+
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+  @@index([createdAt])
+  @@index([readAt])
+}

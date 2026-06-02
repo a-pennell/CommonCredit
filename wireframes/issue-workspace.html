@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issue Workspace — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+    --border-strong: #a3a3a3;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --text-muted: #a8a29e;
+    --accent: #292524;
+    --accent-light: #e7e5e4;
+    --tag-bg: #e7e5e4;
+    --tag-text: #44403c;
+    --warn-bg: #fef9c3;
+    --warn-border: #eab308;
+    --warn-text: #713f12;
+    --ai-bg: #f0fdf4;
+    --ai-border: #86efac;
+    --contested-bg: #fff1f2;
+    --contested-border: #fda4af;
+    --contested-text: #9f1239;
+    --sidebar-w: 220px;
+    --panel-w: 300px;
+    --header-h: 56px;
+    --subheader-h: 48px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP HEADER ─────────────────────────────── */
+  .top-bar {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .org-logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-secondary); font-size: 12px;
+  }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+
+  .top-bar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .status-badge {
+    padding: 3px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* ─── BODY LAYOUT ─────────────────────────────── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── LEFT SIDEBAR ────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    padding: 12px 8px 4px;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 0 8px;
+    margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 500;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .nav-icon {
+    width: 16px; height: 16px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .nav-count {
+    margin-left: auto;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 99px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .nav-item.active .nav-count {
+    background: var(--border);
+    color: var(--text-primary);
+  }
+
+  .nav-flag {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    flex-shrink: 0;
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 8px;
+  }
+
+  .sidebar-meta {
+    padding: 12px 16px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .sidebar-meta-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .sidebar-meta-val { color: var(--text-secondary); font-weight: 500; }
+
+  /* ─── MAIN CONTENT ────────────────────────────── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .subheader {
+    height: var(--subheader-h);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 4px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .tab {
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text-primary); background: var(--bg); }
+  .tab.active {
+    color: var(--text-primary);
+    font-weight: 600;
+    background: var(--accent-light);
+  }
+
+  .content-area {
+    padding: 20px;
+    flex: 1;
+  }
+
+  /* Panel visibility */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ─── OVERVIEW PANEL ──────────────────────────── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .section-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+  .section-action {
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .section-action:hover { color: var(--text-primary); text-decoration: underline; }
+
+  .section-body { padding: 12px 16px; }
+
+  .issue-description {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    padding: 3px 10px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+  .tag.contested {
+    background: var(--contested-bg);
+    color: var(--contested-text);
+    border-color: var(--contested-border);
+  }
+
+  .conflict-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .conflict-type {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .type-value { background: #fef3c7; color: #92400e; }
+  .type-causal { background: #ede9fe; color: #5b21b6; }
+  .type-epistemic { background: #e0f2fe; color: #075985; }
+  .type-distributional { background: #fce7f3; color: #9d174d; }
+
+  .conflict-text { font-size: 12.5px; color: var(--text-primary); }
+  .conflict-parties { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+  .alert-box {
+    padding: 10px 14px;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .alert-warn {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: var(--warn-text);
+  }
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .alert-body { font-size: 12px; }
+  .alert-title { font-weight: 700; margin-bottom: 2px; }
+
+  .uncertainty-item {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .u-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .u-dot.high { background: #f87171; }
+  .u-dot.med { background: #fb923c; }
+
+  /* ─── SOURCES PANEL ───────────────────────────── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .upload-zone:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+  .upload-zone-icon { font-size: 24px; margin-bottom: 8px; }
+  .upload-zone-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .upload-zone-sub { font-size: 11px; }
+
+  .source-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .source-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .icon-pdf { background: #fef2f2; }
+  .icon-doc { background: #eff6ff; }
+  .icon-csv { background: #f0fdf4; }
+  .icon-txt { background: #fafafa; }
+
+  .source-meta { flex: 1; }
+  .source-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .source-sub { font-size: 11px; color: var(--text-secondary); }
+  .source-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+  .processing-bar {
+    margin-top: 6px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .processing-fill {
+    height: 100%;
+    background: #22c55e;
+    border-radius: 99px;
+    animation: progress 2s ease-in-out infinite alternate;
+  }
+  @keyframes progress { from { width: 30%; } to { width: 85%; } }
+
+  .source-action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .claim-count {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ─── THEMES PANEL ────────────────────────────── */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .theme-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .theme-card.pending {
+    border-style: dashed;
+    opacity: 0.7;
+  }
+
+  .theme-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .theme-title { font-size: 13px; font-weight: 700; }
+  .theme-confidence {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .conf-strong { background: #dcfce7; color: #166534; }
+  .conf-weak { background: #fef9c3; color: #713f12; }
+
+  .theme-summary { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5; }
+  .theme-quote {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    border-left: 2px solid var(--border);
+    padding-left: 8px;
+    font-style: italic;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .theme-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .theme-source-count { font-size: 11px; color: var(--text-muted); }
+  .theme-actions { display: flex; gap: 6px; }
+  .action-btn {
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  .action-btn:hover { background: var(--bg); }
+  .action-btn.accept { color: #166534; border-color: #86efac; background: #dcfce7; }
+  .action-btn.reject { color: #9f1239; border-color: #fda4af; background: #fff1f2; }
+
+  /* ─── CLAIMS PANEL ────────────────────────────── */
+  .claims-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .filter-btn:hover:not(.active) { background: var(--bg); }
+
+  .search-box {
+    margin-left: auto;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    background: var(--surface);
+    color: var(--text-primary);
+    width: 180px;
+  }
+
+  .claim-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .claim-row.contested {
+    border-left: 3px solid #f87171;
+    padding-left: 11px;
+  }
+
+  .claim-type-pill {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .pill-fact { background: #e0f2fe; color: #0369a1; }
+  .pill-causal { background: #ede9fe; color: #5b21b6; }
+  .pill-value { background: #fef3c7; color: #92400e; }
+  .pill-assumption { background: #fce7f3; color: #9d174d; }
+  .pill-preference { background: #f0fdf4; color: #166534; }
+
+  .claim-body { flex: 1; }
+  .claim-text { font-size: 13px; color: var(--text-primary); margin-bottom: 5px; font-weight: 500; }
+  .claim-meta-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .claim-source { font-size: 11px; color: var(--text-secondary); }
+  .claim-stakeholder { font-size: 11px; color: var(--text-secondary); font-style: italic; }
+
+  .claim-actions { display: flex; gap: 6px; align-items: center; }
+
+  /* ─── STAKEHOLDERS PANEL ──────────────────────── */
+  .sh-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .sh-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .sh-card.missing {
+    border-style: dashed;
+    border-color: var(--warn-border);
+  }
+
+  .sh-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sh-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .sh-name { font-size: 13px; font-weight: 700; }
+  .sh-power {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .power-high { background: #fee2e2; color: #991b1b; }
+  .power-med { background: #fef3c7; color: #92400e; }
+  .power-low { background: #f1f5f9; color: #475569; }
+
+  .sh-body { padding: 12px 14px; }
+  .sh-field { margin-bottom: 8px; }
+  .sh-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+  .sh-field-value { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  .sh-missing-banner {
+    background: var(--warn-bg);
+    border-top: 1px solid var(--warn-border);
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--warn-text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .perspective-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    margin-top: 8px;
+  }
+  .p-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .p-complete { background: #22c55e; }
+  .p-draft { background: #f59e0b; }
+  .p-empty { background: var(--border); }
+
+  /* ─── DECISIONS PANEL ─────────────────────────── */
+  .decision-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .decision-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .decision-status {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .ds-draft { background: #f1f5f9; color: #475569; }
+  .ds-final { background: #dcfce7; color: #166534; }
+  .ds-pending { background: #fef9c3; color: #713f12; }
+
+  .decision-title { font-size: 14px; font-weight: 700; flex: 1; }
+  .decision-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .decision-body { padding: 14px 16px; }
+  .decision-field { margin-bottom: 12px; }
+  .decision-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .decision-field-value { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+
+  .dissent-box {
+    padding: 10px 12px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #9a3412;
+    line-height: 1.5;
+  }
+
+  .decision-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .lock-icon { font-size: 13px; }
+
+  /* ─── RIGHT AI PANEL ──────────────────────────── */
+  .ai-panel {
+    width: var(--panel-w);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .ai-panel-header {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .ai-title { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+  .ai-subtitle { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+
+  .ai-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .ai-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .ai-summary {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .ai-alert {
+    padding: 8px 10px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: var(--warn-text);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .ai-alert strong { display: block; margin-bottom: 2px; }
+
+  .ai-suggestion {
+    padding: 8px 10px;
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: #166534;
+    margin-bottom: 8px;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .ai-suggestion:hover { filter: brightness(0.97); }
+
+  .ai-cluster-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .ai-cluster-item:last-child { border-bottom: none; }
+  .cluster-bar {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .cluster-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+
+  .ai-footer {
+    padding: 10px 14px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+  }
+  .ai-refresh {
+    width: 100%;
+    padding: 7px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: center;
+  }
+  .ai-refresh:hover { background: var(--bg); }
+
+  /* ─── SCROLLBAR ───────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>SF Planning Dept</span>
+    <span class="sep">/</span>
+    <span>Issues</span>
+    <span class="sep">/</span>
+    <span class="current">Downtown Homelessness Response</span>
+  </div>
+  <span class="status-badge">Active</span>
+  <div class="top-bar-right">
+    <button class="btn">Export</button>
+    <button class="btn">Share</button>
+    <button class="btn btn-primary">+ Add Source</button>
+  </div>
+</div>
+
+<!-- BODY LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Workspace</div>
+
+      <div class="nav-item active" onclick="setNav(this, 'overview')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/>
+          <rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>
+        </svg>
+        Overview
+      </div>
+
+      <div class="nav-item" onclick="setNav(this, 'sources')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/>
+          <path d="M10 2v4h4"/>
+        </svg>
+        Sources
+        <span class="nav-count">8</span>
+      </div>
+
+      <div class="nav-item" onclick="setNav(this, 'themes')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/>
+        </svg>
+        Themes
+        <span class="nav-count">7</span>
+      </div>
+
+      <div class="nav-item" onclick="setNav(this, 'claims')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 4h12M2 8h8M2 12h6"/>
+        </svg>
+        Claims
+        <span class="nav-count">34</span>
+        <span class="nav-flag"></span>
+      </div>
+
+      <div class="nav-item" onclick="setNav(this, 'stakeholders')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5"/>
+          <circle cx="12" cy="5" r="2.5"/><path d="M15 13c0-2.76-2.24-5-5-5"/>
+        </svg>
+        Stakeholders
+        <span class="nav-count">6</span>
+        <span class="nav-flag"></span>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Process</div>
+
+      <div class="nav-item" onclick="setNav(this, 'decisions')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 8l3 3 5-5"/><rect x="2" y="2" width="12" height="12" rx="2"/>
+        </svg>
+        Decisions
+        <span class="nav-count">1</span>
+      </div>
+
+      <div class="nav-item" style="opacity:0.45; pointer-events:none;">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 8c2-4 8-4 12 0s-4 8-8 4-8-4-4-8"/>
+        </svg>
+        System Maps
+        <span class="nav-count" style="background:#e7e5e4;color:#a8a29e;">Ph 3</span>
+      </div>
+
+      <div class="nav-item" style="opacity:0.45; pointer-events:none;">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2v4l3 2-3 2v4M5 4L2 8l3 4"/>
+        </svg>
+        Scenarios
+        <span class="nav-count" style="background:#e7e5e4;color:#a8a29e;">Ph 4</span>
+      </div>
+    </div>
+
+    <div class="sidebar-meta">
+      <div class="sidebar-meta-row"><span>Created</span><span class="sidebar-meta-val">Apr 12, 2026</span></div>
+      <div class="sidebar-meta-row"><span>Last updated</span><span class="sidebar-meta-val">2 hrs ago</span></div>
+      <div class="sidebar-meta-row"><span>Contributors</span><span class="sidebar-meta-val">9 members</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="subheader">
+      <div class="tab active" onclick="setTab(this, 'overview-tab')">Overview</div>
+      <div class="tab" onclick="setTab(this, 'detail-tab')">Detail</div>
+      <div class="tab" onclick="setTab(this, 'history-tab')">History</div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- OVERVIEW PANEL -->
+      <div id="overview" class="panel active">
+
+        <div class="overview-grid">
+          <div class="stat-card">
+            <div class="stat-num">34</div>
+            <div class="stat-label">Claims extracted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">6</div>
+            <div class="stat-label">Stakeholder groups</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:#f59e0b">4</div>
+            <div class="stat-label">Active conflicts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:#f87171">2</div>
+            <div class="stat-label">Missing voices</div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header">
+            <span class="section-title">Issue Description</span>
+            <span class="section-action">Edit</span>
+          </div>
+          <div class="section-body">
+            <p class="issue-description">How should the city respond to rising homelessness in the downtown core? This issue involves tensions between emergency response and structural housing investment, between enforcement and harm-reduction approaches, and between short-term public order and long-term systems change.</p>
+            <div class="tag-row">
+              <span class="tag">Housing</span>
+              <span class="tag">Public Health</span>
+              <span class="tag">Enforcement</span>
+              <span class="tag">Mental Health</span>
+              <span class="tag">Shelter Capacity</span>
+              <span class="tag contested">⚡ Contested</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header">
+            <span class="section-title">Active Conflicts</span>
+            <span class="section-action">View all</span>
+          </div>
+          <div class="section-body">
+            <div class="conflict-item">
+              <span class="conflict-type type-value">Value</span>
+              <div>
+                <div class="conflict-text">Compassion vs. public order — should the primary frame be harm reduction or neighborhood safety?</div>
+                <div class="conflict-parties">Downtown BID, residents ↔ Outreach workers, unhoused advocates</div>
+              </div>
+            </div>
+            <div class="conflict-item">
+              <span class="conflict-type type-causal">Causal</span>
+              <div>
+                <div class="conflict-text">Does sanctioned encampment policy reduce or increase visible homelessness?</div>
+                <div class="conflict-parties">Police Dept, Planning ↔ Public Health, Housing Nonprofits</div>
+              </div>
+            </div>
+            <div class="conflict-item">
+              <span class="conflict-type type-epistemic">Epistemic</span>
+              <div>
+                <div class="conflict-text">Whose evidence counts — clinical outcomes data or direct community testimony?</div>
+                <div class="conflict-parties">City departments ↔ Lived-experience advocates</div>
+              </div>
+            </div>
+            <div class="conflict-item">
+              <span class="conflict-type type-distributional">Distributional</span>
+              <div>
+                <div class="conflict-text">Who bears the cost of enforcement displacement — where do people go?</div>
+                <div class="conflict-parties">All stakeholders</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header">
+            <span class="section-title">Open Uncertainties</span>
+            <span class="section-action">Add</span>
+          </div>
+          <div class="section-body">
+            <div class="uncertainty-item"><span class="u-dot high"></span>Effect of sanctioned encampments on shelter demand and downstream displacement</div>
+            <div class="uncertainty-item"><span class="u-dot high"></span>Capacity and timeline of the supportive housing pipeline over next 18 months</div>
+            <div class="uncertainty-item"><span class="u-dot med"></span>Whether outreach staffing can be sustained under current budget trajectory</div>
+            <div class="uncertainty-item"><span class="u-dot"></span>Funding durability of Prop C allocations after 2027</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SOURCES PANEL -->
+      <div id="sources" class="panel">
+
+        <div class="alert-box alert-warn">
+          <span class="alert-icon">⚠</span>
+          <div class="alert-body">
+            <div class="alert-title">1 source still processing</div>
+            AI extraction in progress for "March Community Meeting Transcript.pdf". Claims and themes will appear when complete.
+          </div>
+        </div>
+
+        <div class="upload-zone">
+          <div class="upload-zone-icon">⬆</div>
+          <div class="upload-zone-title">Drop files here or click to upload</div>
+          <div>PDF, DOCX, TXT, CSV, audio — or paste text directly</div>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon icon-pdf">📄</div>
+          <div class="source-meta">
+            <div class="source-title">Public Comments — Winter 2026 Survey</div>
+            <div class="source-sub">PDF · 847 comments · Uploaded May 28 by R. Torres</div>
+            <div class="source-tags">
+              <span class="tag">Survey</span>
+              <span class="tag">Public input</span>
+            </div>
+            <div class="source-action-row">
+              <span class="claim-count">📌 18 claims extracted</span>
+              <span class="claim-count">🏷 5 themes contributed</span>
+            </div>
+          </div>
+          <button class="action-btn">View</button>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon icon-doc">📝</div>
+          <div class="source-meta">
+            <div class="source-title">March Community Meeting Transcript.pdf</div>
+            <div class="source-sub">PDF · Transcript · Uploaded Jun 1 by D. Okonkwo</div>
+            <div class="source-tags">
+              <span class="tag">Meeting</span>
+              <span class="tag">Transcript</span>
+            </div>
+            <div class="processing-bar"><div class="processing-fill"></div></div>
+            <div class="source-action-row" style="margin-top:6px">
+              <span class="claim-count" style="color:#f59e0b">⏳ Processing…</span>
+            </div>
+          </div>
+          <button class="action-btn">View</button>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon icon-csv">📊</div>
+          <div class="source-meta">
+            <div class="source-title">Shelter Utilization Data 2023–2026</div>
+            <div class="source-sub">CSV · Dataset · 3,200 rows · Uploaded Apr 18 by J. Kim</div>
+            <div class="source-tags">
+              <span class="tag">Data</span>
+              <span class="tag">HSA</span>
+            </div>
+            <div class="source-action-row">
+              <span class="claim-count">📌 6 claims extracted</span>
+            </div>
+          </div>
+          <button class="action-btn">View</button>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon icon-doc">📝</div>
+          <div class="source-meta">
+            <div class="source-title">Outreach Worker Interviews — Q1 2026</div>
+            <div class="source-sub">DOCX · Qualitative · 12 interviews · Uploaded May 2 by M. Chen</div>
+            <div class="source-tags">
+              <span class="tag">Testimony</span>
+              <span class="tag">Qualitative</span>
+            </div>
+            <div class="source-action-row">
+              <span class="claim-count">📌 10 claims extracted</span>
+              <span class="claim-count">🏷 3 themes contributed</span>
+            </div>
+          </div>
+          <button class="action-btn">View</button>
+        </div>
+
+      </div>
+
+      <!-- THEMES PANEL -->
+      <div id="themes" class="panel">
+        <div class="alert-box" style="background:#f0f9ff;border:1px solid #7dd3fc;color:#0c4a6e;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:12px;">
+          <strong>7 themes generated by AI</strong> — Review, rename, merge, or reject. Accepted themes become part of the issue's shared structure.
+        </div>
+
+        <div class="themes-grid">
+
+          <div class="theme-card">
+            <div class="theme-header">
+              <span class="theme-title">Shelter Capacity & Pipeline Gaps</span>
+              <span class="theme-confidence conf-strong">Strong</span>
+            </div>
+            <div class="theme-summary">Recurring concern that shelter and transitional housing capacity is insufficient relative to need, with a slow pipeline of supportive units.</div>
+            <div class="theme-quote">"We keep referring people to shelter waitlists that haven't moved in months."</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">4 sources · 22 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-card">
+            <div class="theme-header">
+              <span class="theme-title">Enforcement vs. Harm Reduction</span>
+              <span class="theme-confidence conf-strong">Strong</span>
+            </div>
+            <div class="theme-summary">Fundamental tension between enforcement-first approaches and harm-reduction models. Present in nearly every source and across all stakeholder groups.</div>
+            <div class="theme-quote">"Clearing encampments doesn't solve anything — it just moves people around."</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">6 sources · 41 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-card">
+            <div class="theme-header">
+              <span class="theme-title">Mental Health & Addiction Services</span>
+              <span class="theme-confidence conf-strong">Strong</span>
+            </div>
+            <div class="theme-summary">Widespread agreement that mental health and addiction services are inadequate. Disagreement on whether this is a cause of homelessness or a compound factor.</div>
+            <div class="theme-quote">"You can't house someone who is actively in crisis without wraparound support."</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">5 sources · 28 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-card">
+            <div class="theme-header">
+              <span class="theme-title">Business District Concerns</span>
+              <span class="theme-confidence conf-strong">Strong</span>
+            </div>
+            <div class="theme-summary">Downtown business owners and BID cite visible encampments as deterring customers and affecting viability. Frame this as a public safety and economic issue.</div>
+            <div class="theme-quote">"Our foot traffic is down 30%. Customers tell us they feel unsafe."</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">3 sources · 17 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-card">
+            <div class="theme-header">
+              <span class="theme-title">Lived-Experience Testimony</span>
+              <span class="theme-confidence conf-weak">Weak signal</span>
+            </div>
+            <div class="theme-summary">Perspectives of unhoused residents themselves — needs, fears, experiences of sweeps, and desired outcomes. Currently underrepresented in uploaded sources.</div>
+            <div class="theme-quote">"I just need somewhere safe to keep my things while I go to my appointments."</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">1 source · 5 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="theme-card pending">
+            <div class="theme-header">
+              <span class="theme-title">Funding & Budget Sustainability</span>
+              <span class="theme-confidence conf-weak">Weak signal</span>
+            </div>
+            <div class="theme-summary">Concerns about the long-term sustainability of current programs, particularly Prop C allocations. May strengthen once meeting transcript is processed.</div>
+            <div class="theme-quote">—</div>
+            <div class="theme-footer">
+              <span class="theme-source-count">2 sources · 8 passages</span>
+              <div class="theme-actions">
+                <button class="action-btn accept">✓ Accept</button>
+                <button class="action-btn reject">✕</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CLAIMS PANEL -->
+      <div id="claims" class="panel">
+
+        <div class="claims-toolbar">
+          <button class="filter-btn active">All (34)</button>
+          <button class="filter-btn">Fact (8)</button>
+          <button class="filter-btn">Causal (11)</button>
+          <button class="filter-btn">Value (7)</button>
+          <button class="filter-btn">Assumption (5)</button>
+          <button class="filter-btn">Contested (6)</button>
+          <input class="search-box" type="text" placeholder="Search claims…">
+        </div>
+
+        <div class="claim-row">
+          <span class="claim-type-pill pill-fact">Fact</span>
+          <div class="claim-body">
+            <div class="claim-text">Unsheltered homelessness in San Francisco increased 35% between 2022 and 2025.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📄 HSA Point-in-Time Count 2025</span>
+              <span class="claim-stakeholder">HSA</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+          </div>
+        </div>
+
+        <div class="claim-row contested">
+          <span class="claim-type-pill pill-causal">Causal</span>
+          <div class="claim-body">
+            <div class="claim-text">Clearing encampments without housing placement increases recidivism and downstream health costs.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📝 Outreach Interviews Q1</span>
+              <span class="claim-stakeholder">Outreach workers, Public Health</span>
+              <span class="tag contested" style="font-size:10px;">⚡ Contested</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+            <button class="action-btn" style="color:#9f1239;">Dispute</button>
+          </div>
+        </div>
+
+        <div class="claim-row">
+          <span class="claim-type-pill pill-value">Value</span>
+          <div class="claim-body">
+            <div class="claim-text">Public spaces should be accessible and safe for all residents, including unhoused individuals.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📄 Public Comments Survey</span>
+              <span class="claim-stakeholder">Housing advocates, Lived-experience</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+          </div>
+        </div>
+
+        <div class="claim-row contested">
+          <span class="claim-type-pill pill-causal">Causal</span>
+          <div class="claim-body">
+            <div class="claim-text">Visible encampments in the downtown core are the primary driver of reduced foot traffic and business revenue.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📄 BID Survey 2025</span>
+              <span class="claim-stakeholder">Downtown BID</span>
+              <span class="tag contested" style="font-size:10px;">⚡ Contested</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+            <button class="action-btn" style="color:#9f1239;">Dispute</button>
+          </div>
+        </div>
+
+        <div class="claim-row">
+          <span class="claim-type-pill pill-assumption">Assumption</span>
+          <div class="claim-body">
+            <div class="claim-text">If housing placement is offered alongside outreach, a significant proportion of unsheltered individuals will accept it.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📝 DPH Housing-First Literature</span>
+              <span class="claim-stakeholder">Public Health Dept</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+          </div>
+        </div>
+
+        <div class="claim-row">
+          <span class="claim-type-pill pill-value">Value</span>
+          <div class="claim-body">
+            <div class="claim-text">Emergency enforcement responses should not be substituted for structural housing investment.</div>
+            <div class="claim-meta-row">
+              <span class="claim-source">📝 Outreach Interviews Q1</span>
+              <span class="claim-stakeholder">Housing nonprofits, Outreach workers</span>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="action-btn">Evidence</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STAKEHOLDERS PANEL -->
+      <div id="stakeholders" class="panel">
+
+        <div class="alert-box alert-warn">
+          <span class="alert-icon">⚠</span>
+          <div class="alert-body">
+            <div class="alert-title">2 missing voices detected</div>
+            Unhoused residents and hospital discharge planners are referenced in source material but have no perspective entry. Consider adding their perspectives or uploading relevant testimony.
+          </div>
+        </div>
+
+        <div class="sh-grid">
+
+          <div class="sh-card">
+            <div class="sh-header">
+              <div class="sh-avatar">UR</div>
+              <div>
+                <div class="sh-name">Unhoused Residents</div>
+                <div style="font-size:11px;color:var(--text-muted)">Primary affected group</div>
+              </div>
+              <span class="sh-power power-low">Low power</span>
+            </div>
+            <div class="sh-body">
+              <div class="sh-field">
+                <div class="sh-field-label">Core Concern</div>
+                <div class="sh-field-value">Safety, stability, access to services without displacement or criminalization</div>
+              </div>
+              <div class="sh-field">
+                <div class="sh-field-label">Feared Outcome</div>
+                <div class="sh-field-value">Forced dispersal without housing placement; loss of possessions</div>
+              </div>
+              <div class="perspective-status">
+                <span class="p-dot p-draft"></span>
+                <span style="font-size:11px;color:var(--text-secondary)">Perspective draft — needs review</span>
+              </div>
+            </div>
+            <div class="sh-missing-banner">⚠ Only 1 source covers this group's direct voice</div>
+          </div>
+
+          <div class="sh-card">
+            <div class="sh-header">
+              <div class="sh-avatar">DB</div>
+              <div>
+                <div class="sh-name">Downtown Businesses (BID)</div>
+                <div style="font-size:11px;color:var(--text-muted)">Economic interest group</div>
+              </div>
+              <span class="sh-power power-high">High power</span>
+            </div>
+            <div class="sh-body">
+              <div class="sh-field">
+                <div class="sh-field-label">Core Concern</div>
+                <div class="sh-field-value">Reduction of visible encampments; increased police presence; economic recovery</div>
+              </div>
+              <div class="sh-field">
+                <div class="sh-field-label">Supported Intervention</div>
+                <div class="sh-field-value">Enforcement, sanctioned sites removed from commercial areas</div>
+              </div>
+              <div class="perspective-status">
+                <span class="p-dot p-complete"></span>
+                <span style="font-size:11px;color:var(--text-secondary)">Perspective complete</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sh-card">
+            <div class="sh-header">
+              <div class="sh-avatar">PH</div>
+              <div>
+                <div class="sh-name">Public Health Dept (DPH)</div>
+                <div style="font-size:11px;color:var(--text-muted)">Government agency</div>
+              </div>
+              <span class="sh-power power-high">High power</span>
+            </div>
+            <div class="sh-body">
+              <div class="sh-field">
+                <div class="sh-field-label">Core Concern</div>
+                <div class="sh-field-value">Health outcomes, addiction and mental health access, Housing First evidence base</div>
+              </div>
+              <div class="sh-field">
+                <div class="sh-field-label">Supported Intervention</div>
+                <div class="sh-field-value">Supportive housing, harm reduction services, diversion programs</div>
+              </div>
+              <div class="perspective-status">
+                <span class="p-dot p-complete"></span>
+                <span style="font-size:11px;color:var(--text-secondary)">Perspective complete</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sh-card">
+            <div class="sh-header">
+              <div class="sh-avatar">HN</div>
+              <div>
+                <div class="sh-name">Housing Nonprofits</div>
+                <div style="font-size:11px;color:var(--text-muted)">Advocacy + service</div>
+              </div>
+              <span class="sh-power power-med">Med power</span>
+            </div>
+            <div class="sh-body">
+              <div class="sh-field">
+                <div class="sh-field-label">Core Concern</div>
+                <div class="sh-field-value">Structural investment in affordable housing and supportive services; anti-displacement protections</div>
+              </div>
+              <div class="sh-field">
+                <div class="sh-field-label">Opposed Intervention</div>
+                <div class="sh-field-value">Enforcement-first sweeps without placement guarantee</div>
+              </div>
+              <div class="perspective-status">
+                <span class="p-dot p-complete"></span>
+                <span style="font-size:11px;color:var(--text-secondary)">Perspective complete</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sh-card missing">
+            <div class="sh-header">
+              <div class="sh-avatar" style="background:#fef9c3;color:#92400e;border-color:#fde68a">HD</div>
+              <div>
+                <div class="sh-name">Hospital Discharge Planners</div>
+                <div style="font-size:11px;color:var(--text-muted)">Healthcare system</div>
+              </div>
+              <span class="sh-power power-low">Low power</span>
+            </div>
+            <div class="sh-body">
+              <div class="sh-field">
+                <div class="sh-field-label">Core Concern</div>
+                <div class="sh-field-value" style="color:var(--text-muted);font-style:italic">No perspective added yet</div>
+              </div>
+              <div class="perspective-status">
+                <span class="p-dot p-empty"></span>
+                <span style="font-size:11px;color:var(--text-secondary)">No perspective — <a href="#" style="color:var(--text-primary)">Add now</a></span>
+              </div>
+            </div>
+            <div class="sh-missing-banner">⚠ Missing voice — mentioned in 3 sources but unrepresented</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DECISIONS PANEL -->
+      <div id="decisions" class="panel">
+
+        <div class="decision-card">
+          <div class="decision-header">
+            <span class="decision-status ds-pending">Pending</span>
+            <div>
+              <div class="decision-title">Homelessness Response Strategy — Q3 2026</div>
+              <div class="decision-date">Draft started Jun 1, 2026 · Target: Jul 15, 2026</div>
+            </div>
+            <button class="btn">Edit</button>
+          </div>
+          <div class="decision-body">
+            <div class="decision-field">
+              <div class="decision-field-label">Options Under Consideration</div>
+              <div class="decision-field-value">
+                1. Expand shelter capacity + harm reduction services (DPH preferred) <br>
+                2. Sanctioned encampments with time limits + case management <br>
+                3. Enforcement-first dispersal with voluntary services referral (BID preferred) <br>
+                4. Hybrid: enforcement pause + 6-month housing placement pilot
+              </div>
+            </div>
+            <div class="decision-field">
+              <div class="decision-field-label">Decision Criteria</div>
+              <div class="decision-field-value">Health outcomes · Equity · Community trust · Fiscal sustainability · Political feasibility</div>
+            </div>
+            <div class="decision-field">
+              <div class="decision-field-label">Key Assumptions</div>
+              <div class="decision-field-value">
+                — Supportive housing pipeline can deliver 200 units by Q4 2027 <br>
+                — Prop C funding remains stable through 2028 <br>
+                — Outreach capacity can scale with demand
+              </div>
+            </div>
+            <div class="decision-field">
+              <div class="decision-field-label">Recorded Dissent</div>
+              <div class="dissent-box">Downtown BID: "Any option that does not include visible enforcement action is unacceptable to our members given the ongoing economic impact." — to be preserved in final record regardless of decision outcome.</div>
+            </div>
+          </div>
+          <div class="decision-footer">
+            <span>Finalize will lock this record</span>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn">Add Indicator</button>
+              <button class="btn btn-primary">Finalize Record</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">
+          + Create new decision record
+        </div>
+
+      </div>
+
+    </div><!-- content-area -->
+  </div><!-- main -->
+
+  <!-- RIGHT AI PANEL -->
+  <div class="ai-panel">
+    <div class="ai-panel-header">
+      <div class="ai-dot"></div>
+      <span class="ai-title">AI Synthesis</span>
+      <span class="ai-subtitle">Updated 2h ago</span>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Issue Summary</div>
+      <p class="ai-summary">This issue centers on a fundamental tension: enforcement approaches that address visible homelessness in the short term vs. structural investment that addresses it sustainably. Sources show broad agreement that shelter capacity is insufficient, but deep disagreement on the right response — split largely along stakeholder lines that also reflect values and identity, not just evidence.</p>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Alerts</div>
+      <div class="ai-alert">
+        <strong>⚠ Missing voices</strong>
+        Unhoused residents and hospital discharge planners are referenced frequently but have minimal direct testimony. Decisions made without these perspectives carry legitimacy risk.
+      </div>
+      <div class="ai-alert">
+        <strong>⚠ Contested causal link</strong>
+        The claim that encampment clearing increases downstream costs is central to the debate but currently backed by only 1 source. This assumption should be surfaced explicitly in the decision record.
+      </div>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Suggested Actions</div>
+      <div class="ai-suggestion">📌 Add perspective for "Unhoused Residents" — referenced in 3 sources but no perspective entry exists</div>
+      <div class="ai-suggestion">🔗 Link shelter capacity data (CSV source) to the uncertainty "supportive housing pipeline timeline"</div>
+      <div class="ai-suggestion">⚡ The "enforcement vs harm reduction" conflict may be rooted in a value disagreement — consider classifying it as such in the conflict view</div>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Agreement Signal</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Where stakeholders broadly agree</div>
+      <div class="ai-cluster-item">
+        <span style="width:120px;flex-shrink:0">Shelter shortage</span>
+        <div class="cluster-bar"><div class="cluster-fill" style="width:92%"></div></div>
+        <span style="font-size:10px;color:var(--text-muted);flex-shrink:0">92%</span>
+      </div>
+      <div class="ai-cluster-item">
+        <span style="width:120px;flex-shrink:0">Mental health gap</span>
+        <div class="cluster-bar"><div class="cluster-fill" style="width:78%"></div></div>
+        <span style="font-size:10px;color:var(--text-muted);flex-shrink:0">78%</span>
+      </div>
+      <div class="ai-cluster-item">
+        <span style="width:120px;flex-shrink:0">Status quo failing</span>
+        <div class="cluster-bar"><div class="cluster-fill" style="width:71%"></div></div>
+        <span style="font-size:10px;color:var(--text-muted);flex-shrink:0">71%</span>
+      </div>
+      <div class="ai-cluster-item">
+        <span style="width:120px;flex-shrink:0">Enforcement works</span>
+        <div class="cluster-bar"><div class="cluster-fill" style="width:28%"></div></div>
+        <span style="font-size:10px;color:var(--text-muted);flex-shrink:0">28%</span>
+      </div>
+    </div>
+
+    <div class="ai-footer">
+      <button class="ai-refresh">↻ Regenerate synthesis</button>
+    </div>
+  </div>
+
+</div><!-- layout -->
+
+<script>
+  function setNav(el, panelId) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function setTab(el, tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
