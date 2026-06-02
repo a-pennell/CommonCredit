@@ -898,3 +898,20 @@ model Notification {
   @@index([createdAt])
   @@index([readAt])
 }
+
+// ============================================================
+// AUTH — VERIFICATION TOKENS
+// Used by Auth.js magic-link (Resend) provider.
+// Sessions are JWT-based so no Session model is needed.
+// Auth.js's OAuth Account model is intentionally omitted —
+// our domain already has a model called Account (the ledger
+// account), and we don't use OAuth.
+// ============================================================
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
