@@ -9,11 +9,33 @@
  *
  * OAuth methods are stubbed out — we don't use any OAuth providers.
  * Session methods are stubbed out — we use JWT sessions.
+ *
+ * Admin emails (from ADMIN_EMAILS env var) can sign in even without a Member
+ * record. They receive a synthetic AdapterUser with id "admin:<email>".
  */
 
 import type { Adapter, AdapterUser } from "@auth/core/adapters"
 import { prisma } from "@/lib/db"
 import type { Member } from "@prisma/client"
+
+const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean)
+
+function isAdminEmail(email: string): boolean {
+  return adminEmails.includes(email)
+}
+
+function syntheticAdminUser(email: string): AdapterUser {
+  return {
+    id: `admin:${email}`,
+    email,
+    name: "Admin",
+    emailVerified: new Date(),
+    image: null,
+  }
+}
 
 function toAdapterUser(member: Member): AdapterUser {
   return {
@@ -29,11 +51,19 @@ export const authAdapter: Adapter = {
   // ---- User (maps to Member) ----
 
   async getUser(id) {
+    // Handle synthetic admin users
+    if (id.startsWith("admin:")) {
+      const email = id.slice("admin:".length)
+      return isAdminEmail(email) ? syntheticAdminUser(email) : null
+    }
     const member = await prisma.member.findUnique({ where: { id } })
     return member ? toAdapterUser(member) : null
   },
 
   async getUserByEmail(email) {
+    // Admin emails bypass the Member table — they have no membership record
+    if (isAdminEmail(email)) return syntheticAdminUser(email)
+
     const member = await prisma.member.findUnique({ where: { email } })
     // Only APPROVED members can sign in
     if (!member || member.status !== "APPROVED") return null
@@ -45,12 +75,20 @@ export const authAdapter: Adapter = {
   },
 
   async updateUser({ id }) {
+    // Handle synthetic admin users — nothing to persist
+    if (id.startsWith("admin:")) {
+      const email = id.slice("admin:".length)
+      return syntheticAdminUser(email)
+    }
     // Auth.js calls this after email verification; we don't need to update anything
     const member = await prisma.member.findUniqueOrThrow({ where: { id } })
     return toAdapterUser(member)
   },
 
-  async createUser() {
+  async createUser({ email }) {
+    // Admin emails get a synthetic user — no DB record needed
+    if (email && isAdminEmail(email)) return syntheticAdminUser(email)
+
     // Members are created through the membership application process, not here.
     // If Auth.js calls this, it means someone tried to sign in with an email
     // that has no matching approved Member record.
