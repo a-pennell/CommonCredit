@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposals — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+    --border-strong: #a3a3a3;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --text-muted: #a8a29e;
+    --accent: #292524;
+    --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3;
+    --warn-border: #eab308;
+    --warn-text: #713f12;
+    --ai-bg: #f0fdf4;
+    --ai-border: #86efac;
+    --header-h: 56px;
+    --subheader-h: 48px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .top-bar {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 12px; flex-shrink: 0;
+  }
+  .org-logo {
+    width: 28px; height: 28px; background: var(--accent);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-secondary); font-size: 12px;
+  }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-primary);
+    font-size: 12px; cursor: pointer; font-weight: 500; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.85; }
+
+  /* ─── SUBHEADER ───────────────────────────────── */
+  .subheader {
+    height: var(--subheader-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 16px; flex-shrink: 0;
+  }
+  .filter-tabs { display: flex; gap: 2px; }
+  .ftab {
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    color: var(--text-secondary); border: 1px solid transparent;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ftab:hover { background: var(--bg); }
+  .ftab.active {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+  .ftab-count {
+    font-size: 10px; font-weight: 700;
+    background: rgba(255,255,255,0.25); padding: 1px 5px; border-radius: 99px;
+  }
+  .ftab:not(.active) .ftab-count {
+    background: var(--accent-light); color: var(--text-secondary);
+  }
+  .subheader-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .sort-label { font-size: 11px; color: var(--text-secondary); }
+  .sort-select {
+    font-size: 12px; padding: 4px 8px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-primary); cursor: pointer;
+  }
+
+  /* ─── BODY LAYOUT ─────────────────────────────── */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── PROPOSAL LIST ───────────────────────────── */
+  .proposal-list {
+    width: 360px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .proposal-list-header {
+    padding: 12px 14px 8px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .proposal-card {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 14px;
+    cursor: pointer;
+    position: relative;
+  }
+  .proposal-card:hover { background: #fafaf9; }
+  .proposal-card.selected {
+    background: #f0f9ff;
+    border-left: 3px solid #2563eb;
+  }
+  .proposal-card.selected .pc-title { color: #1d4ed8; }
+
+  .pc-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .pc-status {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 2px;
+  }
+  .ps-active    { background: #dbeafe; color: #1d4ed8; }
+  .ps-review    { background: #fef3c7; color: #92400e; }
+  .ps-advanced  { background: #dcfce7; color: #166534; }
+  .ps-archived  { background: #f1f5f9; color: #64748b; }
+
+  .pc-title { font-size: 13px; font-weight: 600; line-height: 1.35; color: var(--text-primary); flex: 1; }
+  .pc-meta  { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .pc-meta [data-lucide] { color: var(--text-muted); }
+
+  .pc-signal-bar {
+    display: flex; gap: 4px; align-items: center; margin-bottom: 6px;
+  }
+  .signal-seg {
+    height: 5px; border-radius: 99px; flex-shrink: 0;
+  }
+  .sig-support { background: #22c55e; }
+  .sig-oppose  { background: #f87171; }
+  .sig-neutral { background: #d1d5db; }
+
+  .pc-signal-legend {
+    display: flex; gap: 8px;
+    font-size: 10px; color: var(--text-secondary);
+  }
+  .sl-item { display: flex; align-items: center; gap: 3px; }
+  .sl-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .pc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .pc-tag {
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    background: var(--accent-light); color: var(--text-secondary);
+  }
+
+  /* ─── PROPOSAL DETAIL ─────────────────────────── */
+  .proposal-detail {
+    flex: 1; overflow-y: auto;
+    padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .detail-header { margin-bottom: 4px; }
+  .detail-title { font-size: 18px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  .detail-meta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 11px; color: var(--text-secondary); flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .detail-meta [data-lucide] { color: var(--text-muted); }
+  .detail-status-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .status-pill {
+    padding: 3px 10px; border-radius: 99px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .sp-active   { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+  .sp-review   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .sp-advanced { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+
+  .advance-btn {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid #86efac;
+    background: #dcfce7; color: #166534; font-size: 12px; cursor: pointer;
+    font-weight: 600; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .advance-btn:hover { background: #bbf7d0; }
+  .advance-btn [data-lucide] { color: #16a34a; }
+
+  /* Detail sections */
+  .detail-section {
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); overflow: hidden;
+  }
+  .detail-section-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .detail-section-header [data-lucide] { color: var(--text-muted); }
+  .detail-section-body { padding: 14px 16px; }
+
+  .proposal-summary {
+    font-size: 13px; line-height: 1.65; color: var(--text-primary);
+  }
+  .proposal-summary p + p { margin-top: 8px; }
+
+  /* Support/Oppose signal */
+  .signal-overview {
+    display: flex; gap: 16px; margin-bottom: 14px;
+  }
+  .signal-block {
+    flex: 1; border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; text-align: center;
+  }
+  .signal-count { font-size: 22px; font-weight: 700; }
+  .signal-count.support-count { color: #16a34a; }
+  .signal-count.oppose-count  { color: #dc2626; }
+  .signal-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-top: 1px; }
+
+  .signal-full-bar {
+    height: 8px; border-radius: 99px; overflow: hidden;
+    display: flex; gap: 2px; margin-bottom: 12px;
+  }
+
+  /* Stakeholder stances */
+  .stakeholder-stance-list { display: flex; flex-direction: column; gap: 6px; }
+  .ss-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+  }
+  .ss-avatar {
+    width: 26px; height: 26px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; flex-shrink: 0;
+    background: var(--accent-light); color: var(--text-secondary);
+  }
+  .ss-name  { flex: 1; font-size: 12px; font-weight: 500; }
+  .ss-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .ssb-support  { background: #dcfce7; color: #166534; }
+  .ssb-oppose   { background: #fee2e2; color: #9f1239; }
+  .ssb-neutral  { background: #f1f5f9; color: #64748b; }
+  .ssb-unclear  { background: #f5f3ff; color: #5b21b6; }
+  .ss-note { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Linked claims */
+  .claim-link-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .claim-type-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 1px;
+  }
+  .ct-causal     { background: #ede9fe; color: #5b21b6; }
+  .ct-fact       { background: #e0f2fe; color: #0369a1; }
+  .ct-value      { background: #fef3c7; color: #92400e; }
+  .ct-assumption { background: #fce7f3; color: #9d174d; }
+  .claim-text { font-size: 12px; color: var(--text-primary); line-height: 1.4; }
+  .claim-icon-row { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 10px; color: var(--text-muted); }
+  .claim-icon-row [data-lucide] { color: var(--text-muted); }
+
+  /* Objections */
+  .objection-item {
+    border-left: 3px solid #f87171;
+    padding: 8px 12px; background: #fff8f8;
+    border-radius: 0 6px 6px 0; margin-bottom: 6px;
+  }
+  .objection-who { font-size: 11px; font-weight: 600; margin-bottom: 3px; color: var(--text-primary); }
+  .objection-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .objection-type {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 1px 5px; border-radius: 3px;
+    background: #fee2e2; color: #9f1239; margin-left: 6px;
+  }
+
+  /* AI summary */
+  .ai-summary-box {
+    background: var(--ai-bg); border: 1px solid var(--ai-border);
+    border-radius: 6px; padding: 12px 14px;
+    font-size: 12px; color: #166534; line-height: 1.6;
+  }
+  .ai-summary-box .ai-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #16a34a; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ai-summary-box [data-lucide] { color: #16a34a; }
+
+  /* Deliberation link */
+  .deliberation-link-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer;
+  }
+  .deliberation-link-card:hover { background: var(--bg); }
+  .delib-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: #eff6ff; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .delib-icon [data-lucide] { color: #2563eb; width: 16px; height: 16px; }
+  .delib-info { flex: 1; }
+  .delib-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .delib-meta  { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .delib-open { font-size: 11px; color: #2563eb; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 3px; }
+  .delib-open [data-lucide] { color: #2563eb; }
+
+  /* Revision history */
+  .revision-list { display: flex; flex-direction: column; gap: 0; }
+  .revision-item {
+    display: flex; gap: 12px; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .revision-item:last-child { border-bottom: none; }
+  .rev-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border-strong); flex-shrink: 0; margin-top: 5px;
+  }
+  .rev-dot.current { background: #2563eb; }
+  .rev-info { flex: 1; }
+  .rev-label { font-size: 12px; color: var(--text-primary); }
+  .rev-meta  { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel {
+    width: 260px; flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .panel-header {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px;
+  }
+  .action-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 6px; margin-bottom: 6px; cursor: pointer;
+  }
+  .action-item:hover { background: var(--bg); }
+  .action-icon { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ai-advance  { background: #dcfce7; }
+  .ai-advance [data-lucide]  { color: #16a34a; }
+  .ai-deliberate { background: #eff6ff; }
+  .ai-deliberate [data-lucide] { color: #2563eb; }
+  .ai-compare { background: #f5f3ff; }
+  .ai-compare [data-lucide] { color: #7c3aed; }
+  .ai-archive { background: #f1f5f9; }
+  .ai-archive [data-lucide] { color: #64748b; }
+  .action-text { flex: 1; }
+  .action-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .action-sub   { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
+
+  .ai-readiness {
+    background: var(--ai-bg); border: 1px solid var(--ai-border);
+    border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+    font-size: 11px; color: #166534; line-height: 1.5;
+  }
+  .ai-readiness strong { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-bottom: 3px; }
+  .ai-readiness [data-lucide] { color: #16a34a; }
+  .ai-caution {
+    background: var(--warn-bg); border: 1px solid var(--warn-border);
+    border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+    font-size: 11px; color: var(--warn-text); line-height: 1.5;
+  }
+  .ai-caution strong { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-bottom: 3px; }
+  .ai-caution [data-lucide] { color: #d97706; }
+
+  .compare-card {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 6px; cursor: pointer;
+  }
+  .compare-card:hover { background: var(--bg); }
+  .compare-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .compare-meta  { font-size: 10px; color: var(--text-secondary); display: flex; gap: 8px; }
+  .compare-sig {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+    vertical-align: middle; margin-right: 2px;
+  }
+
+  /* ─── LUCIDE ICONS ────────────────────────────── */
+  [data-lucide] {
+    width: 13px; height: 13px;
+    display: inline-flex; vertical-align: middle;
+    flex-shrink: 0; stroke-width: 2;
+    color: currentColor;
+  }
+  .action-icon [data-lucide] { width: 14px; height: 14px; }
+  .delib-icon [data-lucide]  { width: 16px; height: 16px; }
+  .panel-header [data-lucide]{ width: 15px; height: 15px; }
+  .advance-btn [data-lucide] { width: 14px; height: 14px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>SF Planning Dept</span>
+    <span class="sep">/</span>
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span class="current">Proposals</span>
+  </div>
+  <div class="top-bar-right">
+    <button class="btn btn-primary"><i data-lucide="plus"></i> New Proposal</button>
+  </div>
+</div>
+
+<!-- SUBHEADER / FILTERS -->
+<div class="subheader">
+  <div class="filter-tabs">
+    <div class="ftab active"><i data-lucide="circle-dot"></i> Active <span class="ftab-count">3</span></div>
+    <div class="ftab"><i data-lucide="arrow-up-right"></i> Advanced <span class="ftab-count">1</span></div>
+    <div class="ftab"><i data-lucide="archive"></i> Archived <span class="ftab-count">2</span></div>
+    <div class="ftab"><i data-lucide="layers"></i> All <span class="ftab-count">6</span></div>
+  </div>
+  <div class="subheader-right">
+    <span class="sort-label">Sort by</span>
+    <select class="sort-select">
+      <option>Most support</option>
+      <option>Most recent</option>
+      <option>Most contested</option>
+    </select>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- PROPOSAL LIST -->
+  <div class="proposal-list">
+    <div class="proposal-list-header">3 active proposals</div>
+
+    <!-- Card 1 — selected -->
+    <div class="proposal-card selected">
+      <div class="pc-header">
+        <span class="pc-status ps-review">Under Review</span>
+        <div class="pc-title">Housing-first encampment response with 72-hr outreach window</div>
+      </div>
+      <div class="pc-meta">
+        <span><i data-lucide="user"></i> D. Okonkwo</span>
+        <span><i data-lucide="calendar"></i> Jun 1, 2026</span>
+        <span><i data-lucide="message-square"></i> 15 contributions</span>
+      </div>
+      <div class="pc-signal-bar">
+        <div class="signal-seg sig-support" style="width:56px;"></div>
+        <div class="signal-seg sig-oppose"  style="width:24px;"></div>
+        <div class="signal-seg sig-neutral" style="width:20px;"></div>
+      </div>
+      <div class="pc-signal-legend">
+        <div class="sl-item"><span class="sl-dot" style="background:#22c55e;"></span> 4 support</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#f87171;"></span> 2 oppose</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#d1d5db;"></span> 1 unclear</div>
+      </div>
+      <div class="pc-tags">
+        <span class="pc-tag">Housing-first</span>
+        <span class="pc-tag">Enforcement</span>
+        <span class="pc-tag">DPH</span>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="proposal-card">
+      <div class="pc-header">
+        <span class="pc-status ps-active">Active</span>
+        <div class="pc-title">Sanctioned encampment sites with wraparound services pilot</div>
+      </div>
+      <div class="pc-meta">
+        <span><i data-lucide="user"></i> M. Chen</span>
+        <span><i data-lucide="calendar"></i> May 28, 2026</span>
+        <span><i data-lucide="message-square"></i> 8 contributions</span>
+      </div>
+      <div class="pc-signal-bar">
+        <div class="signal-seg sig-support" style="width:40px;"></div>
+        <div class="signal-seg sig-oppose"  style="width:32px;"></div>
+        <div class="signal-seg sig-neutral" style="width:28px;"></div>
+      </div>
+      <div class="pc-signal-legend">
+        <div class="sl-item"><span class="sl-dot" style="background:#22c55e;"></span> 3 support</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#f87171;"></span> 3 oppose</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#d1d5db;"></span> 2 unclear</div>
+      </div>
+      <div class="pc-tags">
+        <span class="pc-tag">Pilot</span>
+        <span class="pc-tag">Wraparound</span>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="proposal-card">
+      <div class="pc-header">
+        <span class="pc-status ps-active">Active</span>
+        <div class="pc-title">Enhanced shelter voucher program with private-sector partnerships</div>
+      </div>
+      <div class="pc-meta">
+        <span><i data-lucide="user"></i> T. Reyes</span>
+        <span><i data-lucide="calendar"></i> May 25, 2026</span>
+        <span><i data-lucide="message-square"></i> 5 contributions</span>
+      </div>
+      <div class="pc-signal-bar">
+        <div class="signal-seg sig-support" style="width:30px;"></div>
+        <div class="signal-seg sig-oppose"  style="width:24px;"></div>
+        <div class="signal-seg sig-neutral" style="width:46px;"></div>
+      </div>
+      <div class="pc-signal-legend">
+        <div class="sl-item"><span class="sl-dot" style="background:#22c55e;"></span> 2 support</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#f87171;"></span> 2 oppose</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#d1d5db;"></span> 4 unclear</div>
+      </div>
+      <div class="pc-tags">
+        <span class="pc-tag">Voucher</span>
+        <span class="pc-tag">Private sector</span>
+      </div>
+    </div>
+
+    <!-- Advanced -->
+    <div class="proposal-list-header" style="margin-top:0;">Advanced to decision</div>
+    <div class="proposal-card">
+      <div class="pc-header">
+        <span class="pc-status ps-advanced">Advanced</span>
+        <div class="pc-title">Immediate SFPD enforcement sweep — Civic Center corridor</div>
+      </div>
+      <div class="pc-meta">
+        <span><i data-lucide="user"></i> K. Petrov</span>
+        <span><i data-lucide="calendar"></i> May 10, 2026</span>
+      </div>
+      <div class="pc-signal-legend" style="margin-top:4px;">
+        <div class="sl-item"><span class="sl-dot" style="background:#22c55e;"></span> 2 support</div>
+        <div class="sl-item"><span class="sl-dot" style="background:#f87171;"></span> 5 oppose</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPOSAL DETAIL -->
+  <div class="proposal-detail">
+
+    <div class="detail-header">
+      <div class="detail-title">Housing-first encampment response with 72-hr outreach window</div>
+      <div class="detail-meta">
+        <span><i data-lucide="user"></i> Submitted by D. Okonkwo (Outreach Workers)</span>
+        <span><i data-lucide="calendar"></i> Jun 1, 2026</span>
+        <span><i data-lucide="git-branch"></i> Revision 3</span>
+      </div>
+      <div class="detail-status-row">
+        <span class="status-pill sp-review">Under Review</span>
+        <button class="advance-btn"><i data-lucide="arrow-up-right"></i> Advance to Decision</button>
+        <button class="btn"><i data-lucide="pencil"></i> Revise</button>
+        <button class="btn"><i data-lucide="git-branch-plus"></i> Compare</button>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="align-left"></i> Proposal Summary</div>
+      <div class="detail-section-body">
+        <div class="proposal-summary">
+          <p>The city should adopt a housing-first encampment response protocol across the downtown core. All encampment clearings must be preceded by a minimum 72-hour outreach engagement period, during which the DPH outreach team must confirm the availability of a shelter bed or transitional housing offer before SFPD can proceed.</p>
+          <p>SFPD enforcement actions on encampments are conditioned on DPH outreach team authorization. The DPH will maintain placement records and report monthly to the Board of Supervisors on offer rates, placement rates, and 90-day housing stability outcomes.</p>
+          <p>This proposal directly addresses the contested causal claim that clearing without housing placement increases downstream health costs and recidivism, by structurally tying enforcement to housing availability.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stakeholder signal -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="users"></i> Stakeholder Signal</div>
+      <div class="detail-section-body">
+        <div class="signal-overview">
+          <div class="signal-block">
+            <div class="signal-count support-count">4</div>
+            <div class="signal-label">Supporting</div>
+          </div>
+          <div class="signal-block">
+            <div class="signal-count oppose-count">2</div>
+            <div class="signal-label">Opposing</div>
+          </div>
+          <div class="signal-block">
+            <div class="signal-count" style="color:var(--text-secondary);">1</div>
+            <div class="signal-label">Unclear</div>
+          </div>
+        </div>
+        <div class="signal-full-bar">
+          <div class="signal-seg sig-support" style="flex:4; border-radius:99px 0 0 99px;"></div>
+          <div class="signal-seg sig-oppose"  style="flex:2;"></div>
+          <div class="signal-seg sig-neutral" style="flex:1; border-radius:0 99px 99px 0;"></div>
+        </div>
+        <div class="stakeholder-stance-list">
+          <div class="ss-item">
+            <div class="ss-avatar">OW</div>
+            <div class="ss-name">Outreach Workers</div>
+            <span class="ss-badge ssb-support">Support</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">PH</div>
+            <div class="ss-name">Public Health (DPH)</div>
+            <span class="ss-badge ssb-support">Support</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">HN</div>
+            <div class="ss-name">Housing Nonprofits</div>
+            <span class="ss-badge ssb-support">Support</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">CC</div>
+            <div class="ss-name">City Council</div>
+            <span class="ss-badge ssb-support">Support</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">DB</div>
+            <div class="ss-name">Downtown BID</div>
+            <span class="ss-badge ssb-oppose">Oppose</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">KP</div>
+            <div class="ss-name">Police Dept (SFPD)</div>
+            <span class="ss-badge ssb-oppose">Oppose</span>
+          </div>
+          <div class="ss-item">
+            <div class="ss-avatar">UR</div>
+            <div class="ss-name">Unhoused Residents</div>
+            <span class="ss-badge ssb-unclear">No position recorded</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key objections -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="message-circle-warning"></i> Key Objections</div>
+      <div class="detail-section-body">
+        <div class="objection-item">
+          <div class="objection-who">K. Petrov — SFPD <span class="objection-type">Operational</span></div>
+          <div class="objection-text">The 72-hour window removes operational flexibility for officers responding to acute public safety incidents. Needs an emergency exception pathway for immediate threats.</div>
+        </div>
+        <div class="objection-item">
+          <div class="objection-who">J. Liu — Downtown BID <span class="objection-type">Factual</span></div>
+          <div class="objection-text">The causal claim underlying this proposal conflates correlation and causation. The 68% SFPD offer rate has not been validated as equivalent to actual placements — the factual basis is contested.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linked claims -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="link"></i> Claims This Proposal Addresses</div>
+      <div class="detail-section-body">
+        <div class="claim-link-item">
+          <span class="claim-type-badge ct-causal">Causal</span>
+          <div>
+            <div class="claim-text">Clearing encampments without housing placement increases recidivism and downstream health costs.</div>
+            <div class="claim-icon-row"><i data-lucide="zap"></i> Contested &nbsp;·&nbsp; 15 deliberation contributions</div>
+          </div>
+        </div>
+        <div class="claim-link-item">
+          <span class="claim-type-badge ct-fact">Fact</span>
+          <div>
+            <div class="claim-text">Unsheltered homelessness in San Francisco increased 35% between 2022 and 2025.</div>
+            <div class="claim-icon-row"><i data-lucide="check-circle"></i> Accepted &nbsp;·&nbsp; 1 evidence source</div>
+          </div>
+        </div>
+        <div class="claim-link-item">
+          <span class="claim-type-badge ct-value">Value</span>
+          <div>
+            <div class="claim-text">Public spaces should be accessible and safe for all residents, including those experiencing homelessness.</div>
+            <div class="claim-icon-row"><i data-lucide="users"></i> Value claim &nbsp;·&nbsp; No resolution expected</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linked deliberation -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="messages-square"></i> Linked Deliberation</div>
+      <div class="detail-section-body">
+        <div class="deliberation-link-card">
+          <div class="delib-icon"><i data-lucide="message-square-quote"></i></div>
+          <div class="delib-info">
+            <div class="delib-title">Encampment Clearing &amp; Health Costs</div>
+            <div class="delib-meta">Open · 15 contributions · Last activity 2h ago</div>
+          </div>
+          <span class="delib-open"><i data-lucide="arrow-up-right"></i> Open</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI readiness summary -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="sparkles"></i> AI Readiness Assessment</div>
+      <div class="detail-section-body">
+        <div class="ai-summary-box">
+          <div class="ai-label"><i data-lucide="sparkles"></i> AI Synthesis</div>
+          This proposal has the strongest evidence base of the three active proposals. The core causal claim has undergone structured deliberation with emerging consensus on refined language. The primary unresolved issue — whether the SFPD 68% offer rate reflects actual placements — is a definitional dispute that may require data clarification rather than further deliberation. Advancing to a decision record is plausible with the existing evidence, provided the untested assumption is explicitly acknowledged.
+        </div>
+      </div>
+    </div>
+
+    <!-- Revision history -->
+    <div class="detail-section">
+      <div class="detail-section-header"><i data-lucide="git-branch"></i> Revision History</div>
+      <div class="detail-section-body">
+        <div class="revision-list">
+          <div class="revision-item">
+            <div class="rev-dot current"></div>
+            <div class="rev-info">
+              <div class="rev-label"><strong>Rev 3 (current)</strong> — Language refined following deliberation on SFPD offer-rate dispute</div>
+              <div class="rev-meta">Jun 1, 2026 · D. Okonkwo</div>
+            </div>
+          </div>
+          <div class="revision-item">
+            <div class="rev-dot"></div>
+            <div class="rev-info">
+              <div class="rev-label">Rev 2 — Added 72-hr minimum following City Council feedback</div>
+              <div class="rev-meta">May 28, 2026 · D. Okonkwo</div>
+            </div>
+          </div>
+          <div class="revision-item">
+            <div class="rev-dot"></div>
+            <div class="rev-info">
+              <div class="rev-label">Rev 1 — Initial submission</div>
+              <div class="rev-meta">May 20, 2026 · D. Okonkwo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px;"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="panel-header">
+      <i data-lucide="zap" style="color:#d97706;"></i>
+      <span class="panel-header-title">Actions</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Decision Steward</div>
+      <div class="action-item">
+        <div class="action-icon ai-advance"><i data-lucide="arrow-up-right"></i></div>
+        <div class="action-text">
+          <div class="action-label">Advance to Decision</div>
+          <div class="action-sub">Move proposal to Decision Record workflow</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-icon ai-deliberate"><i data-lucide="message-square-quote"></i></div>
+        <div class="action-text">
+          <div class="action-label">Open Deliberation</div>
+          <div class="action-sub">Start structured dialogue on this proposal</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-icon ai-compare"><i data-lucide="git-branch-plus"></i></div>
+        <div class="action-text">
+          <div class="action-label">Compare Proposals</div>
+          <div class="action-sub">Side-by-side with other active proposals</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-icon ai-archive"><i data-lucide="archive"></i></div>
+        <div class="action-text">
+          <div class="action-label">Archive</div>
+          <div class="action-sub">Remove from active consideration</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">AI Assessment</div>
+      <div class="ai-readiness">
+        <strong><i data-lucide="check-circle"></i> Ready to advance</strong>
+        Evidence trail is complete. Deliberation has reached near-consensus on core claim language. Recommend advancing with explicit acknowledgment of the SFPD offer-rate assumption.
+      </div>
+      <div class="ai-caution">
+        <strong><i data-lucide="alert-triangle"></i> Missing voice</strong>
+        Unhoused Residents have no recorded position on this proposal. Given they are the primary affected group, advancing without their input carries a legitimacy risk.
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Compare with</div>
+      <div class="compare-card">
+        <div class="compare-title">Sanctioned encampment sites pilot</div>
+        <div class="compare-meta">
+          <span><span class="compare-sig" style="background:#22c55e;"></span>3 support</span>
+          <span><span class="compare-sig" style="background:#f87171;"></span>3 oppose</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-title">Enhanced shelter voucher program</div>
+        <div class="compare-meta">
+          <span><span class="compare-sig" style="background:#22c55e;"></span>2 support</span>
+          <span><span class="compare-sig" style="background:#f87171;"></span>2 oppose</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

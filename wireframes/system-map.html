@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Map — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f4; --surface: #ffffff; --border: #d4d4d4;
+    --border-strong: #a3a3a3; --text-primary: #1c1917;
+    --text-secondary: #78716c; --text-muted: #a8a29e;
+    --accent: #292524; --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3; --warn-border: #eab308; --warn-text: #713f12;
+    --ai-bg: #f0fdf4; --ai-border: #86efac;
+    --header-h: 56px; --toolbar-h: 44px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 13px; line-height: 1.5; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .top-bar { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+  .org-logo { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12px; }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 12px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .status-pill { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sp-draft { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+  /* ─── CANVAS TOOLBAR ──────────────────────────── */
+  .canvas-toolbar { height: var(--toolbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; gap: 6px; flex-shrink: 0; }
+  .tool-group { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .tool-btn { padding: 5px 9px; font-size: 11px; cursor: pointer; color: var(--text-secondary); background: var(--surface); border: none; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+  .tool-btn:hover { background: var(--bg); }
+  .tool-btn.active { background: var(--accent); color: white; }
+  .tool-btn [data-lucide] { width: 13px; height: 13px; }
+  .toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+  .zoom-label { font-size: 11px; color: var(--text-secondary); padding: 0 6px; }
+
+  /* ─── BODY ────────────────────────────────────── */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── LEFT: VARIABLES PANEL ───────────────────── */
+  .left-panel { width: 210px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .lp-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .lp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px; }
+  .lp-scroll { flex: 1; overflow-y: auto; }
+
+  .var-list-item { display: flex; align-items: center; gap: 7px; padding: 6px 12px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+  .var-list-item:hover { background: var(--bg); }
+  .var-list-item.selected { background: #eff6ff; color: var(--text-primary); font-weight: 500; }
+  .var-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .vd-normal    { background: var(--accent); }
+  .vd-contested { background: #d97706; }
+  .vd-uncertain { background: #7c3aed; }
+  .var-name { flex: 1; line-height: 1.3; }
+  .var-link-count { font-size: 9px; color: var(--text-muted); background: var(--accent-light); padding: 1px 5px; border-radius: 99px; }
+
+  .loop-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 11px; }
+  .loop-item:hover { background: var(--bg); }
+  .loop-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+  .lb-r { background: #fee2e2; color: #9f1239; }
+  .lb-b { background: #dbeafe; color: #1d4ed8; }
+  .loop-name { flex: 1; color: var(--text-secondary); }
+
+  .add-var-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; border-top: 1px solid var(--border); }
+  .add-var-btn:hover { color: var(--text-primary); background: var(--bg); }
+
+  /* ─── CANVAS ──────────────────────────────────── */
+  .canvas-wrap { flex: 1; overflow: hidden; position: relative; background: #fafaf9; cursor: default; }
+  .canvas-bg { position: absolute; inset: 0; }
+  /* dot grid */
+  .canvas-bg { background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px); background-size: 24px 24px; }
+
+  .canvas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+  /* Variable node styles (SVG foreignObject approach via <g>) */
+  /* All drawn in SVG directly */
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel { width: 280px; flex-shrink: 0; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .panel-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px; }
+
+  /* Link properties */
+  .prop-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .prop-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; width: 72px; flex-shrink: 0; padding-top: 2px; }
+  .prop-val   { font-size: 12px; color: var(--text-primary); flex: 1; }
+  .prop-val.link-label { display: flex; align-items: center; gap: 5px; font-weight: 600; font-size: 13px; }
+
+  .polarity-badge { font-size: 13px; font-weight: 800; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pol-pos { background: #dcfce7; color: #16a34a; }
+  .pol-neg { background: #fee2e2; color: #dc2626; }
+
+  .strength-bar { display: flex; gap: 3px; align-items: center; }
+  .strength-seg { width: 24px; height: 6px; border-radius: 2px; }
+  .ss-filled { background: var(--accent); }
+  .ss-empty  { background: var(--accent-light); }
+
+  .conf-pill { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; }
+  .cp-high { background: #dcfce7; color: #166534; }
+  .cp-med  { background: #fef3c7; color: #92400e; }
+  .cp-low  { background: #fee2e2; color: #9f1239; }
+
+  .contested-box { background: #fff1f2; border: 1px solid #fda4af; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; font-size: 11px; color: #9f1239; line-height: 1.5; }
+  .contested-box strong { display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 4px; }
+  .contested-box [data-lucide] { color: #dc2626; }
+
+  .evidence-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 5px; margin-bottom: 6px; font-size: 11px; cursor: pointer; }
+  .evidence-item:hover { background: var(--bg); }
+  .ev-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ev-icon [data-lucide] { width: 12px; height: 12px; }
+  .ev-pdf  { background: #fef2f2; }
+  .ev-pdf  [data-lucide] { color: #dc2626; }
+  .ev-claim { background: #ede9fe; }
+  .ev-claim [data-lucide] { color: #5b21b6; }
+  .ev-text { flex: 1; }
+  .ev-title { font-weight: 500; color: var(--text-primary); line-height: 1.3; }
+  .ev-meta  { color: var(--text-muted); font-size: 10px; margin-top: 1px; }
+
+  /* AI suggestions */
+  .ai-suggest-card { background: var(--ai-bg); border: 1px solid var(--ai-border); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; }
+  .ai-suggest-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #16a34a; margin-bottom: 5px; display: flex; align-items: center; gap: 4px; }
+  .ai-suggest-label [data-lucide] { color: #16a34a; width: 11px; height: 11px; }
+  .ai-suggest-text { font-size: 11.5px; color: #166534; line-height: 1.5; margin-bottom: 7px; }
+  .ai-suggest-actions { display: flex; gap: 5px; }
+  .ai-sug-btn { font-size: 11px; padding: 3px 9px; border-radius: 4px; cursor: pointer; font-weight: 600; border: 1px solid; }
+  .ai-sug-add { background: #16a34a; color: white; border-color: #16a34a; }
+  .ai-sug-dismiss { background: white; color: var(--text-muted); border-color: var(--border); }
+
+  /* Link action buttons */
+  .link-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .la-btn { padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: var(--surface); }
+  .la-btn:hover { background: var(--bg); }
+  .la-btn [data-lucide] { width: 11px; height: 11px; }
+  .la-contest { color: #dc2626; border-color: #fca5a5; }
+  .la-contest:hover { background: #fff1f2; }
+
+  /* ─── ICONS ───────────────────────────────────── */
+  [data-lucide] { width: 13px; height: 13px; display: inline-flex; vertical-align: middle; flex-shrink: 0; stroke-width: 2; color: currentColor; }
+  .panel-header [data-lucide] { width: 15px; height: 15px; }
+  .tool-btn [data-lucide]     { width: 13px; height: 13px; }
+  .add-var-btn [data-lucide]  { width: 13px; height: 13px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span>System Maps</span>
+    <span class="sep">/</span>
+    <span class="current">Homelessness Dynamics — v2</span>
+  </div>
+  <div class="top-bar-right">
+    <span class="status-pill sp-draft">Draft</span>
+    <button class="btn"><i data-lucide="git-branch"></i> v2 of 3</button>
+    <button class="btn"><i data-lucide="download"></i> Export SVG</button>
+    <button class="btn btn-primary"><i data-lucide="globe"></i> Publish Map</button>
+  </div>
+</div>
+
+<!-- CANVAS TOOLBAR -->
+<div class="canvas-toolbar">
+  <div class="tool-group">
+    <button class="tool-btn active"><i data-lucide="mouse-pointer-2"></i> Select</button>
+    <button class="tool-btn"><i data-lucide="circle-dot"></i> Variable</button>
+    <button class="tool-btn"><i data-lucide="arrow-right"></i> Link</button>
+    <button class="tool-btn"><i data-lucide="sticky-note"></i> Note</button>
+  </div>
+  <div class="toolbar-sep"></div>
+  <div class="tool-group">
+    <button class="tool-btn"><i data-lucide="undo-2"></i></button>
+    <button class="tool-btn"><i data-lucide="redo-2"></i></button>
+  </div>
+  <div class="toolbar-sep"></div>
+  <div class="tool-group">
+    <button class="tool-btn"><i data-lucide="zoom-out"></i></button>
+    <span class="zoom-label">100%</span>
+    <button class="tool-btn"><i data-lucide="zoom-in"></i></button>
+    <button class="tool-btn"><i data-lucide="maximize-2"></i></button>
+  </div>
+  <div class="toolbar-sep"></div>
+  <button class="tool-btn" style="color:#7c3aed; border:1px solid #c4b5fd; background:#f5f3ff; border-radius:5px; padding:4px 9px;"><i data-lucide="sparkles"></i> AI Suggest</button>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="lp-section">
+      <div class="lp-label">Variables (7)</div>
+      <div style="font-size:10px; color:var(--text-muted);">Click to locate on map</div>
+    </div>
+    <div class="lp-scroll">
+      <div class="var-list-item"><div class="var-dot vd-normal"></div><span class="var-name">Shelter Capacity</span><span class="var-link-count">2</span></div>
+      <div class="var-list-item"><div class="var-dot vd-normal"></div><span class="var-name">Encampment Population</span><span class="var-link-count">3</span></div>
+      <div class="var-list-item selected"><div class="var-dot vd-contested"></div><span class="var-name" style="color:#1d4ed8;">Clearing Operations</span><span class="var-link-count">3</span></div>
+      <div class="var-list-item"><div class="var-dot vd-contested"></div><span class="var-name">Displacement Rate</span><span class="var-link-count">2</span></div>
+      <div class="var-list-item"><div class="var-dot vd-normal"></div><span class="var-name">Health System Costs</span><span class="var-link-count">1</span></div>
+      <div class="var-list-item"><div class="var-dot vd-normal"></div><span class="var-name">Housing Placements</span><span class="var-link-count">3</span></div>
+      <div class="var-list-item"><div class="var-dot vd-uncertain"></div><span class="var-name">Outreach Capacity</span><span class="var-link-count">1</span></div>
+
+      <div class="lp-section" style="margin-top:4px;">
+        <div class="lp-label">Feedback Loops (2)</div>
+      </div>
+      <div class="loop-item">
+        <span class="loop-badge lb-r">R1</span>
+        <span class="loop-name">Clearings → Displacement → Costs</span>
+      </div>
+      <div class="loop-item">
+        <span class="loop-badge lb-b">B1</span>
+        <span class="loop-name">Housing ↔ Encampment Pop</span>
+      </div>
+
+      <div class="add-var-btn"><i data-lucide="plus-circle"></i> Add variable</div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap">
+    <div class="canvas-bg"></div>
+    <svg class="canvas-svg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Standard arrowhead -->
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#44403c"/>
+        </marker>
+        <!-- Contested arrowhead (amber) -->
+        <marker id="arrow-contested" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#d97706"/>
+        </marker>
+        <!-- Negative arrowhead (blue-grey) -->
+        <marker id="arrow-neg" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/>
+        </marker>
+        <!-- Uncertain arrowhead (purple) -->
+        <marker id="arrow-uncertain" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#7c3aed"/>
+        </marker>
+        <!-- Selected arrowhead -->
+        <marker id="arrow-selected" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/>
+        </marker>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/>
+        </filter>
+        <filter id="shadow-selected">
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="rgba(37,99,235,0.35)"/>
+        </filter>
+      </defs>
+
+      <!-- ═══ CAUSAL LINKS ═══ -->
+
+      <!-- 1. Encampment Pop → Clearing Ops (+, strong) -->
+      <path d="M 192 258 C 240 230 270 210 300 196" stroke="#44403c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+      <!-- polarity label -->
+      <circle cx="246" cy="228" r="9" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="246" y="232" text-anchor="middle" font-size="11" font-weight="800" fill="#16a34a">+</text>
+      <!-- strength dots -->
+      <circle cx="218" cy="244" r="3" fill="#44403c"/>
+      <circle cx="228" cy="238" r="3" fill="#44403c"/>
+      <circle cx="238" cy="234" r="3" fill="#44403c"/>
+
+      <!-- 2. Clearing Ops → Displacement (CONTESTED, +, medium-dash) -->
+      <path d="M 448 196 C 478 210 500 230 520 252" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arrow-contested)"/>
+      <circle cx="484" cy="224" r="9" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="484" y="228" text-anchor="middle" font-size="11" font-weight="800" fill="#d97706">+</text>
+      <!-- contested warning -->
+      <rect x="492" y="210" width="52" height="18" rx="3" fill="#fff1f2" stroke="#fda4af" stroke-width="1"/>
+      <text x="518" y="222" text-anchor="middle" font-size="9" font-weight="700" fill="#9f1239">CONTESTED</text>
+
+      <!-- 3. Displacement → Health Costs (+, medium) -->
+      <path d="M 656 258 C 680 240 700 210 706 196" stroke="#44403c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+      <circle cx="682" cy="228" r="9" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="682" y="232" text-anchor="middle" font-size="11" font-weight="800" fill="#16a34a">+</text>
+
+      <!-- 4. Shelter Cap → Housing Placements (+, strong) -->
+      <path d="M 265 82 L 412 82" stroke="#44403c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+      <circle cx="338" cy="82" r="9" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="338" y="86" text-anchor="middle" font-size="11" font-weight="800" fill="#16a34a">+</text>
+      <circle cx="306" cy="74" r="3" fill="#44403c"/>
+      <circle cx="318" cy="74" r="3" fill="#44403c"/>
+      <circle cx="330" cy="74" r="3" fill="#44403c"/>
+
+      <!-- 5. Housing Placements → Encampment Pop (−, medium, balancing) -->
+      <path d="M 412 98 C 350 140 280 200 226 248" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrow-neg)"/>
+      <circle cx="322" cy="168" r="9" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="322" y="172" text-anchor="middle" font-size="11" font-weight="800" fill="#2563eb">−</text>
+
+      <!-- 6. Outreach Capacity → Housing Placements (+, low conf, uncertain/dashed) -->
+      <path d="M 280 385 C 320 320 380 220 412 106" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,4" fill="none" marker-end="url(#arrow-uncertain)"/>
+      <circle cx="346" cy="256" r="9" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="346" y="260" text-anchor="middle" font-size="11" font-weight="800" fill="#7c3aed">+</text>
+      <text x="378" y="312" text-anchor="middle" font-size="9" fill="#7c3aed" font-style="italic">low conf.</text>
+
+      <!-- 7. Clearing Ops → Encampment Pop (−, conditional) -->
+      <path d="M 300 206 C 270 220 240 240 210 254" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-neg)"/>
+      <circle cx="254" cy="236" r="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+      <text x="254" y="240" text-anchor="middle" font-size="10" font-weight="800" fill="#2563eb">−</text>
+
+      <!-- ═══ FEEDBACK LOOP ANNOTATIONS ═══ -->
+      <!-- R1 label (reinforcing — red loop) -->
+      <path d="M 440 320 Q 560 360 620 290 Q 660 240 610 200" stroke="#dc2626" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.5"/>
+      <rect x="490" y="345" width="38" height="18" rx="9" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+      <text x="509" y="357" text-anchor="middle" font-size="10" font-weight="700" fill="#9f1239">R1</text>
+
+      <!-- B1 label (balancing — blue loop) -->
+      <path d="M 440 74 Q 390 40 310 55 Q 200 68 180 100 Q 160 148 175 230" stroke="#2563eb" stroke-width="1" fill="none" stroke-dasharray="3,3" opacity="0.5"/>
+      <rect x="148" y="134" width="30" height="18" rx="9" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+      <text x="163" y="146" text-anchor="middle" font-size="10" font-weight="700" fill="#1d4ed8">B1</text>
+
+      <!-- ═══ VARIABLE NODES ═══ -->
+
+      <!-- Shelter Capacity -->
+      <g filter="url(#shadow)">
+        <rect x="120" y="60" width="145" height="44" rx="8" fill="white" stroke="#d4d4d4" stroke-width="1.5"/>
+        <text x="192" y="87" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Shelter Capacity</text>
+      </g>
+
+      <!-- Encampment Population -->
+      <g filter="url(#shadow)">
+        <rect x="28" y="238" width="164" height="44" rx="8" fill="white" stroke="#d4d4d4" stroke-width="1.5"/>
+        <text x="110" y="265" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Encampment Pop.</text>
+      </g>
+
+      <!-- Clearing Operations — SELECTED (blue glow, has contested link) -->
+      <g filter="url(#shadow-selected)">
+        <rect x="300" y="174" width="148" height="44" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+        <text x="374" y="201" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">Clearing Operations</text>
+      </g>
+      <!-- selected ring -->
+      <rect x="298" y="172" width="152" height="48" rx="10" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+      <!-- Displacement Rate — involved in contested link (amber tint) -->
+      <g filter="url(#shadow)">
+        <rect x="502" y="238" width="154" height="44" rx="8" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <text x="579" y="265" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">Displacement Rate</text>
+      </g>
+      <!-- contested indicator -->
+      <circle cx="650" cy="238" r="6" fill="#d97706"/>
+      <text x="650" y="242" text-anchor="middle" font-size="9" font-weight="700" fill="white">!</text>
+
+      <!-- Health System Costs -->
+      <g filter="url(#shadow)">
+        <rect x="658" y="140" width="154" height="44" rx="8" fill="white" stroke="#d4d4d4" stroke-width="1.5"/>
+        <text x="735" y="167" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Health System Costs</text>
+      </g>
+
+      <!-- Housing Placements -->
+      <g filter="url(#shadow)">
+        <rect x="412" y="60" width="154" height="44" rx="8" fill="white" stroke="#d4d4d4" stroke-width="1.5"/>
+        <text x="489" y="87" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Housing Placements</text>
+      </g>
+
+      <!-- Outreach Capacity — uncertain (purple tint) -->
+      <g filter="url(#shadow)">
+        <rect x="148" y="368" width="154" height="44" rx="8" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.5"/>
+        <text x="225" y="395" text-anchor="middle" font-size="12" font-weight="600" fill="#5b21b6">Outreach Capacity</text>
+      </g>
+      <!-- uncertainty annotation -->
+      <rect x="220" y="413" width="116" height="16" rx="3" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1"/>
+      <text x="278" y="424" text-anchor="middle" font-size="9" fill="#5b21b6">⚠ Low confidence link</text>
+
+      <!-- AI suggestion: new variable (ghost/dotted) -->
+      <g opacity="0.75">
+        <rect x="660" y="320" width="154" height="44" rx="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="737" y="341" text-anchor="middle" font-size="10" font-weight="700" fill="#16a34a">✦ AI SUGGESTION</text>
+        <text x="737" y="355" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">Service Utilisation</text>
+        <!-- ghost link -->
+        <path d="M 662 340 C 640 310 630 290 630 282" stroke="#86efac" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrow)"/>
+      </g>
+
+      <!-- Instruction note -->
+      <rect x="14" y="460" width="240" height="46" rx="6" fill="#fef9c3" stroke="#fcd34d" stroke-width="1"/>
+      <text x="134" y="478" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">Selected: Clearing Ops → Displacement Rate</text>
+      <text x="134" y="493" text-anchor="middle" font-size="10" fill="#713f12">This causal link is contested. See right panel.</text>
+
+    </svg>
+  </div>
+
+  <!-- RIGHT PANEL: SELECTED LINK PROPERTIES -->
+  <div class="right-panel">
+
+    <div class="panel-header">
+      <i data-lucide="arrow-right" style="color:#2563eb;"></i>
+      <span class="panel-header-title">Causal Link</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="prop-row">
+        <span class="prop-label">Link</span>
+        <span class="prop-val link-label">Clearing Operations <i data-lucide="arrow-right" style="color:var(--text-muted);"></i> Displacement Rate</span>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Polarity</span>
+        <span class="prop-val"><span class="polarity-badge pol-pos">+</span> <span style="font-size:12px; color:var(--text-secondary); margin-left:4px;">Same direction</span></span>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Strength</span>
+        <span class="prop-val">
+          <div class="strength-bar">
+            <div class="strength-seg ss-filled"></div>
+            <div class="strength-seg ss-filled"></div>
+            <div class="strength-seg ss-empty"></div>
+            <span style="font-size:11px; color:var(--text-secondary); margin-left:4px;">Medium</span>
+          </div>
+        </span>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Delay</span>
+        <span class="prop-val" style="color:var(--text-secondary);">Moderate (weeks–months)</span>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Confidence</span>
+        <span class="prop-val"><span class="conf-pill cp-low">Low</span></span>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="contested-box">
+        <strong><i data-lucide="zap"></i> Contested</strong>
+        J. Liu (Downtown BID) disputes this causal link. Argues clearing operations do not cause displacement — pre-existing displacement and health needs are the root cause. See deliberation contributions.
+      </div>
+      <div class="link-actions">
+        <button class="la-btn"><i data-lucide="message-square-quote"></i> Open deliberation</button>
+        <button class="la-btn la-contest"><i data-lucide="zap"></i> Manage contest</button>
+        <button class="la-btn"><i data-lucide="pencil"></i> Edit</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Evidence (2)</div>
+      <div class="evidence-item">
+        <div class="ev-icon ev-pdf"><i data-lucide="file-text"></i></div>
+        <div class="ev-text">
+          <div class="ev-title">UCSF Housing First Cost Study</div>
+          <div class="ev-meta">PDF · Primary source for this link</div>
+        </div>
+      </div>
+      <div class="evidence-item">
+        <div class="ev-icon ev-claim"><i data-lucide="message-square-quote"></i></div>
+        <div class="ev-text">
+          <div class="ev-title">Causal claim: clearing → recidivism + health costs</div>
+          <div class="ev-meta">Accepted claim · 6 endorsements</div>
+        </div>
+      </div>
+      <div style="border:1px dashed var(--border-strong); border-radius:5px; padding:6px 10px; font-size:11px; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:5px;">
+        <i data-lucide="plus"></i> Add evidence
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">AI Suggestions</div>
+      <div class="ai-suggest-card">
+        <div class="ai-suggest-label"><i data-lucide="sparkles"></i> New variable suggested</div>
+        <div class="ai-suggest-text">Consider adding <strong>Service Utilisation Rate</strong> as an intermediate variable between Displacement Rate and Health System Costs — it would make the causal pathway testable with existing DPH data.</div>
+        <div class="ai-suggest-actions">
+          <button class="ai-sug-btn ai-sug-add">Add variable</button>
+          <button class="ai-sug-btn ai-sug-dismiss">Dismiss</button>
+        </div>
+      </div>
+      <div class="ai-suggest-card">
+        <div class="ai-suggest-label"><i data-lucide="sparkles"></i> Link strength update</div>
+        <div class="ai-suggest-text">The D. Okonkwo refinement from deliberation supports upgrading this link's confidence from Low to Medium — the refined claim language narrows the causal scope to a testable mechanism.</div>
+        <div class="ai-suggest-actions">
+          <button class="ai-sug-btn ai-sug-add">Update confidence</button>
+          <button class="ai-sug-btn ai-sug-dismiss">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Feedback Loops</div>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.6; padding:4px 0;">
+        This link is part of <strong style="color:#9f1239;">R1 — Reinforcing loop</strong>: Encampment Pop. → Clearing Ops. → Displacement Rate → Health System Costs. The loop has no balancing force — costs accumulate without a housing intervention breaking the cycle.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

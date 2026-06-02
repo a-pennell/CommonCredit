@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source Import & Extraction Review — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+    --border-strong: #a3a3a3;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --text-muted: #a8a29e;
+    --accent: #292524;
+    --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3;
+    --warn-border: #eab308;
+    --warn-text: #713f12;
+    --ai-bg: #f0fdf4;
+    --ai-border: #86efac;
+    --header-h: 56px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .top-bar {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 12px; flex-shrink: 0;
+  }
+  .org-logo {
+    width: 28px; height: 28px; background: var(--accent);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-secondary); font-size: 12px;
+  }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+
+  /* Flow stepper */
+  .stepper {
+    display: flex; align-items: center; gap: 0;
+    margin: 0 auto;
+  }
+  .step {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    padding: 4px 10px;
+  }
+  .step-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent-light); color: var(--text-muted);
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step.done .step-num   { background: #dcfce7; color: #166534; }
+  .step.done             { color: var(--text-secondary); }
+  .step.active .step-num { background: var(--accent); color: white; }
+  .step.active           { color: var(--text-primary); font-weight: 600; }
+  .step-arrow { color: var(--border-strong); font-size: 14px; margin: 0 -2px; }
+
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-primary);
+    font-size: 12px; cursor: pointer; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-success { background: #16a34a; color: white; border-color: #16a34a; }
+  .btn-success:hover { opacity: 0.85; }
+
+  /* ─── BODY ────────────────────────────────────── */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── LEFT: SOURCE VIEWER ─────────────────────── */
+  .source-panel {
+    width: 280px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .source-panel-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .source-file-row {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+  }
+  .source-file-icon {
+    width: 36px; height: 36px; border-radius: 6px;
+    background: #fef2f2;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .source-file-icon [data-lucide] { color: #dc2626; width: 18px; height: 18px; }
+  .source-file-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .source-file-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  .source-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  }
+  .smg-item { display: flex; flex-direction: column; gap: 1px; }
+  .smg-key  { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+  .smg-val  { font-size: 11px; font-weight: 500; color: var(--text-primary); }
+
+  .credibility-row {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .credibility-label { font-size: 11px; color: var(--text-secondary); flex: 1; }
+  .credibility-stars { display: flex; gap: 2px; }
+  .star { width: 12px; height: 12px; }
+  .star-filled [data-lucide] { color: #f59e0b; }
+  .star-empty  [data-lucide] { color: var(--border-strong); }
+
+  .source-panel-scroll {
+    flex: 1; overflow-y: auto; padding: 12px 14px;
+  }
+
+  .passages-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px;
+  }
+
+  .passage-item {
+    padding: 8px 10px;
+    border-left: 3px solid var(--border);
+    background: var(--bg);
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 11px; line-height: 1.55;
+    color: var(--text-secondary);
+  }
+  .passage-item:hover { background: #f0f9ff; border-left-color: #93c5fd; }
+  .passage-item.highlighted {
+    background: #fffbeb; border-left-color: #fbbf24;
+    color: var(--text-primary);
+  }
+  .passage-item.claim-linked {
+    background: #f5f3ff; border-left-color: #c4b5fd;
+  }
+  .passage-ref {
+    font-size: 10px; color: var(--text-muted); margin-top: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .passage-ref [data-lucide] { color: var(--text-muted); }
+  .passage-claim-count {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    background: #ede9fe; color: #5b21b6;
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ─── CENTER: EXTRACTION REVIEW ──────────────── */
+  .review-center {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* Tab bar + progress */
+  .review-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .review-tabs {
+    display: flex; gap: 0; padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rtab {
+    padding: 10px 14px; font-size: 12px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .rtab:hover { color: var(--text-primary); }
+  .rtab.active {
+    color: var(--text-primary); font-weight: 600;
+    border-bottom-color: var(--accent);
+  }
+  .rtab-count {
+    font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 99px;
+    background: var(--accent-light); color: var(--text-secondary);
+  }
+  .rtab.active .rtab-count {
+    background: var(--accent); color: white;
+  }
+  .rtab-pending { background: #fee2e2 !important; color: #9f1239 !important; }
+
+  .review-subheader {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+  }
+  .progress-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  .progress-bar-wrap {
+    flex: 1; height: 5px; border-radius: 99px;
+    background: var(--accent-light); overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 99px; background: #16a34a;
+    width: 39%;
+  }
+  .filter-row { display: flex; gap: 4px; margin-left: auto; }
+  .filter-chip {
+    font-size: 11px; padding: 3px 9px; border-radius: 99px;
+    border: 1px solid var(--border); cursor: pointer;
+    color: var(--text-secondary); background: var(--surface);
+  }
+  .filter-chip:hover { background: var(--bg); }
+  .filter-chip.active {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+
+  /* Review scroll area */
+  .review-scroll { flex: 1; overflow-y: auto; padding: 14px 16px; }
+
+  /* Claim cards */
+  .claim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .claim-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .claim-card.accepted { border-left: 3px solid #16a34a; }
+  .claim-card.rejected { border-left: 3px solid #d1d5db; opacity: 0.6; }
+  .claim-card.editing  { border-left: 3px solid #2563eb; box-shadow: 0 0 0 2px #dbeafe; }
+
+  .cc-header {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px 8px;
+  }
+  .claim-type-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px; flex-shrink: 0; margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+  .ct-fact       { background: #e0f2fe; color: #0369a1; }
+  .ct-causal     { background: #ede9fe; color: #5b21b6; }
+  .ct-value      { background: #fef3c7; color: #92400e; }
+  .ct-assumption { background: #fce7f3; color: #9d174d; }
+  .ct-preference { background: #f1f5f9; color: #475569; }
+
+  .cc-text {
+    flex: 1; font-size: 13px; color: var(--text-primary); line-height: 1.5; font-weight: 500;
+  }
+
+  .confidence-pill {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 99px; flex-shrink: 0; margin-top: 2px;
+  }
+  .conf-high { background: #dcfce7; color: #166534; }
+  .conf-mid  { background: #fef3c7; color: #92400e; }
+  .conf-low  { background: #fee2e2; color: #9f1239; }
+
+  .cc-passage {
+    margin: 0 14px 10px;
+    padding: 8px 10px;
+    background: #fffbeb;
+    border-left: 3px solid #fbbf24;
+    border-radius: 0 4px 4px 0;
+    font-size: 11px; color: var(--text-secondary);
+    line-height: 1.55; font-style: italic;
+  }
+  .cc-passage-ref {
+    font-size: 10px; color: var(--text-muted); margin-top: 4px;
+    font-style: normal; display: flex; align-items: center; gap: 4px;
+  }
+  .cc-passage-ref [data-lucide] { color: var(--text-muted); }
+
+  .cc-footer {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    background: #fafaf9;
+    border-top: 1px solid var(--border);
+  }
+  .cc-action {
+    padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface);
+  }
+  .cc-action:hover { background: var(--bg); }
+  .cc-accept { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
+  .cc-accept:hover { background: #dcfce7; }
+  .cc-accept [data-lucide] { color: #16a34a; }
+  .cc-edit   { color: #2563eb; border-color: #93c5fd; }
+  .cc-edit:hover { background: #eff6ff; }
+  .cc-edit [data-lucide] { color: #2563eb; }
+  .cc-reject { color: var(--text-muted); }
+  .cc-reject:hover { color: #dc2626; border-color: #fda4af; background: #fff1f2; }
+  .cc-reject [data-lucide] { color: var(--text-muted); }
+  .cc-reject:hover [data-lucide] { color: #dc2626; }
+
+  .cc-accepted-state {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; background: #f0fdf4;
+    border-top: 1px solid #86efac;
+    font-size: 11px; color: #166534; font-weight: 600;
+  }
+  .cc-accepted-state [data-lucide] { color: #16a34a; }
+  .cc-undo { margin-left: auto; font-size: 10px; color: var(--text-muted); cursor: pointer; }
+  .cc-undo:hover { color: var(--text-primary); }
+
+  .cc-rejected-state {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; background: var(--bg);
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted);
+  }
+  .cc-rejected-state [data-lucide] { color: var(--text-muted); }
+
+  /* Edit mode */
+  .cc-edit-area {
+    margin: 0 14px 10px;
+    border: 1px solid #93c5fd;
+    border-radius: 6px; overflow: hidden;
+    background: #eff6ff;
+  }
+  .cc-edit-textarea {
+    width: 100%; padding: 10px 12px;
+    border: none; background: transparent;
+    font-size: 13px; font-weight: 500; line-height: 1.5;
+    color: var(--text-primary); resize: none; outline: none;
+    font-family: inherit;
+  }
+  .cc-edit-toolbar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-top: 1px solid #bfdbfe;
+    background: #dbeafe;
+  }
+  .cc-edit-note { font-size: 10px; color: #1d4ed8; flex: 1; }
+  .cc-edit-save { padding: 3px 9px; border-radius: 4px; border: 1px solid #3b82f6; background: #2563eb; color: white; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .cc-edit-cancel { padding: 3px 9px; border-radius: 4px; border: 1px solid var(--border); background: white; color: var(--text-secondary); font-size: 11px; cursor: pointer; }
+
+  /* Theme cards */
+  .theme-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .theme-card.accepted { border-left: 3px solid #16a34a; }
+  .tc-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .tc-icon {
+    width: 30px; height: 30px; border-radius: 6px;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tc-icon [data-lucide] { color: var(--text-secondary); width: 14px; height: 14px; }
+  .tc-body { flex: 1; }
+  .tc-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .tc-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .tc-signal {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px;
+  }
+  .tcs-strong { background: #dcfce7; color: #166534; }
+  .tcs-moderate { background: #fef3c7; color: #92400e; }
+  .tc-meta {
+    display: flex; gap: 10px; font-size: 11px; color: var(--text-muted);
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .tc-meta [data-lucide] { color: var(--text-muted); }
+  .tc-excerpt {
+    font-size: 11px; font-style: italic; color: var(--text-secondary);
+    background: var(--bg); border-left: 3px solid var(--border);
+    padding: 6px 10px; border-radius: 0 4px 4px 0;
+    line-height: 1.5; margin-bottom: 10px;
+  }
+  .tc-footer {
+    display: flex; gap: 6px; border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  /* Stakeholder cards */
+  .stakeholder-extract-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; margin-bottom: 10px;
+  }
+  .se-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .se-avatar {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--accent-light); color: var(--text-secondary);
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .se-name { font-size: 13px; font-weight: 600; }
+  .se-type { font-size: 11px; color: var(--text-secondary); }
+  .se-status-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 99px;
+  }
+  .ses-present  { background: #dcfce7; color: #166534; }
+  .ses-absent   { background: #fee2e2; color: #9f1239; }
+  .ses-indirect { background: #fef3c7; color: #92400e; }
+  .se-mentions {
+    font-size: 11px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 4px; margin-bottom: 8px;
+  }
+  .se-mentions [data-lucide] { color: var(--text-muted); }
+  .se-quote {
+    font-size: 11px; font-style: italic; color: var(--text-secondary);
+    background: var(--bg); border-left: 3px solid var(--border);
+    padding: 6px 10px; border-radius: 0 4px 4px 0;
+    line-height: 1.5; margin-bottom: 10px;
+  }
+  .se-footer { display: flex; gap: 6px; }
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel {
+    width: 260px; flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .panel-header {
+    padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px;
+  }
+
+  /* Progress summary */
+  .progress-summary { display: flex; flex-direction: column; gap: 6px; }
+  .ps-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px;
+  }
+  .ps-label { color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+  .ps-label [data-lucide] { flex-shrink: 0; }
+  .ps-count { font-weight: 700; }
+  .ps-accepted [data-lucide]  { color: #16a34a; }
+  .ps-accepted .ps-count      { color: #16a34a; }
+  .ps-rejected [data-lucide]  { color: var(--text-muted); }
+  .ps-rejected .ps-count      { color: var(--text-muted); }
+  .ps-pending  [data-lucide]  { color: #d97706; }
+  .ps-pending  .ps-count      { color: #d97706; }
+
+  .bulk-action {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 10px; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer; margin-bottom: 6px;
+  }
+  .bulk-action:hover { background: var(--bg); }
+  .ba-icon {
+    width: 24px; height: 24px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ba-accept  { background: #dcfce7; }
+  .ba-accept  [data-lucide] { color: #16a34a; }
+  .ba-reject  { background: #fee2e2; }
+  .ba-reject  [data-lucide] { color: #dc2626; }
+  .ba-text { flex: 1; }
+  .ba-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .ba-sub   { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
+
+  .ai-box {
+    border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+    font-size: 11px; line-height: 1.55;
+  }
+  .ai-box-green { background: var(--ai-bg); border: 1px solid var(--ai-border); color: #166534; }
+  .ai-box-amber { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+  .ai-box strong { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-bottom: 3px; }
+  .ai-box-green [data-lucide] { color: #16a34a; }
+  .ai-box-amber [data-lucide] { color: #d97706; }
+
+  .finish-section {
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .finish-note {
+    font-size: 11px; color: var(--text-secondary); line-height: 1.55;
+  }
+
+  /* ─── LUCIDE ICONS ────────────────────────────── */
+  [data-lucide] {
+    width: 13px; height: 13px;
+    display: inline-flex; vertical-align: middle;
+    flex-shrink: 0; stroke-width: 2;
+    color: currentColor;
+  }
+  .source-file-icon [data-lucide] { width: 18px; height: 18px; }
+  .panel-header [data-lucide]     { width: 15px; height: 15px; }
+  .tc-icon [data-lucide]          { width: 14px; height: 14px; }
+  .ba-icon [data-lucide]          { width: 13px; height: 13px; }
+  .cc-action [data-lucide]        { width: 12px; height: 12px; }
+  .cc-accepted-state [data-lucide]{ width: 13px; height: 13px; }
+  .cc-rejected-state [data-lucide]{ width: 13px; height: 13px; }
+  .ai-box [data-lucide]           { width: 12px; height: 12px; }
+  .ps-label [data-lucide]         { width: 12px; height: 12px; }
+  .tc-meta [data-lucide]          { width: 11px; height: 11px; }
+  .se-mentions [data-lucide]      { width: 11px; height: 11px; }
+  .passage-ref [data-lucide]      { width: 10px; height: 10px; }
+  .cc-passage-ref [data-lucide]   { width: 10px; height: 10px; }
+  .step-num-check [data-lucide]   { width: 11px; height: 11px; color: #16a34a; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span>Sources</span>
+    <span class="sep">/</span>
+    <span class="current">March Community Meeting Transcript.pdf</span>
+  </div>
+
+  <div class="stepper">
+    <div class="step done">
+      <div class="step-num"><i data-lucide="check" class="step-num-check"></i></div>
+      Upload
+    </div>
+    <span class="step-arrow">›</span>
+    <div class="step done">
+      <div class="step-num"><i data-lucide="check" class="step-num-check"></i></div>
+      Processing
+    </div>
+    <span class="step-arrow">›</span>
+    <div class="step active">
+      <div class="step-num">3</div>
+      Review Extraction
+    </div>
+  </div>
+
+  <div class="top-bar-right">
+    <button class="btn"><i data-lucide="arrow-left"></i> Back to Sources</button>
+    <button class="btn btn-success"><i data-lucide="check-circle"></i> Finish Review</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- LEFT: SOURCE VIEWER -->
+  <div class="source-panel">
+    <div class="source-panel-header">
+      <div class="source-file-row">
+        <div class="source-file-icon"><i data-lucide="file-text"></i></div>
+        <div>
+          <div class="source-file-name">March Community Meeting Transcript.pdf</div>
+          <div class="source-file-meta">PDF · Transcript · 24 pages · 3.2 MB</div>
+        </div>
+      </div>
+      <div class="source-meta-grid">
+        <div class="smg-item">
+          <span class="smg-key">Source type</span>
+          <span class="smg-val">Community meeting</span>
+        </div>
+        <div class="smg-item">
+          <span class="smg-key">Date</span>
+          <span class="smg-val">Mar 14, 2026</span>
+        </div>
+        <div class="smg-item">
+          <span class="smg-key">Uploaded by</span>
+          <span class="smg-val">D. Okonkwo</span>
+        </div>
+        <div class="smg-item">
+          <span class="smg-key">Attendees</span>
+          <span class="smg-val">~40 participants</span>
+        </div>
+      </div>
+      <div class="credibility-row">
+        <span class="credibility-label">Credibility rating</span>
+        <div class="credibility-stars">
+          <span class="star star-filled"><i data-lucide="star"></i></span>
+          <span class="star star-filled"><i data-lucide="star"></i></span>
+          <span class="star star-filled"><i data-lucide="star"></i></span>
+          <span class="star star-filled"><i data-lucide="star"></i></span>
+          <span class="star star-empty"><i data-lucide="star"></i></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="source-panel-scroll">
+      <div class="passages-title">Highlighted Passages</div>
+
+      <div class="passage-item highlighted">
+        "We keep referring people to shelter waitlists that haven't moved in months. The capacity just isn't there."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 4 · Outreach worker<span class="passage-claim-count" style="margin-left:auto;">2 claims</span></div>
+      </div>
+
+      <div class="passage-item claim-linked">
+        "Unsheltered homelessness in the downtown core increased by 35% between 2022 and 2025 according to our Point-in-Time count data."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 3 · HSA representative<span class="passage-claim-count" style="margin-left:auto;">1 claim</span></div>
+      </div>
+
+      <div class="passage-item claim-linked">
+        "Every time we clear a site without a housing offer, we see those same individuals back at the emergency room within 30 days. The costs are being pushed downstream."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 7 · DPH outreach lead<span class="passage-claim-count" style="margin-left:auto;">1 claim</span></div>
+      </div>
+
+      <div class="passage-item">
+        "Our members are seeing a 30% drop in foot traffic near encampment sites. This is an economic as well as a social problem."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 15 · BID representative</div>
+      </div>
+
+      <div class="passage-item">
+        "Mental health and addiction services are chronically underfunded. You can't address visible homelessness without addressing the underlying health crisis."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 9 · Nonprofit representative</div>
+      </div>
+
+      <div class="passage-item">
+        "Public spaces belong to everyone — including people without housing. Our approach needs to reflect that value."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 12 · Community advocate</div>
+      </div>
+
+      <div class="passage-item">
+        "SFPD offers shelter to 68% of individuals at clearing sites. The issue is acceptance rates, not our offer rate."
+        <div class="passage-ref"><i data-lucide="bookmark"></i> Page 18 · SFPD representative</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: REVIEW -->
+  <div class="review-center">
+    <div class="review-header">
+      <div class="review-tabs">
+        <div class="rtab active">
+          <i data-lucide="message-square-quote"></i> Claims
+          <span class="rtab-count rtab-pending">17 pending</span>
+        </div>
+        <div class="rtab">
+          <i data-lucide="tag"></i> Themes
+          <span class="rtab-count">7</span>
+        </div>
+        <div class="rtab">
+          <i data-lucide="users"></i> Stakeholders
+          <span class="rtab-count">4</span>
+        </div>
+      </div>
+      <div class="review-subheader">
+        <span class="progress-label">11 of 28 claims reviewed</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+        <div class="filter-row">
+          <span class="filter-chip active">All</span>
+          <span class="filter-chip">Pending</span>
+          <span class="filter-chip">Accepted</span>
+          <span class="filter-chip">Rejected</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-scroll">
+
+      <!-- ACCEPTED claim -->
+      <div class="claim-card accepted">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-fact">Fact</span>
+          <div class="cc-text">Unsheltered homelessness in San Francisco increased 35% between 2022 and 2025.</div>
+          <span class="confidence-pill conf-high">High</span>
+        </div>
+        <div class="cc-passage">
+          "Unsheltered homelessness in the downtown core increased by 35% between 2022 and 2025 according to our Point-in-Time count data."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 3 · HSA representative</div>
+        </div>
+        <div class="cc-accepted-state">
+          <i data-lucide="check-circle"></i> Accepted
+          <span class="cc-undo">Undo</span>
+        </div>
+      </div>
+
+      <!-- ACCEPTED + edited claim -->
+      <div class="claim-card accepted">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-causal">Causal</span>
+          <div class="cc-text">Clearing encampments without housing placement increases recidivism and downstream health costs.</div>
+          <span class="confidence-pill conf-mid">Medium</span>
+        </div>
+        <div class="cc-passage">
+          "Every time we clear a site without a housing offer, we see those same individuals back at the emergency room within 30 days. The costs are being pushed downstream."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 7 · DPH outreach lead</div>
+        </div>
+        <div class="cc-accepted-state">
+          <i data-lucide="check-circle"></i> Accepted (language edited)
+          <span class="cc-undo">Undo</span>
+        </div>
+      </div>
+
+      <!-- PENDING claim — editing mode -->
+      <div class="claim-card editing">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-value">Value</span>
+          <div class="cc-text">Public spaces should be safe and accessible for all residents, including people experiencing homelessness.</div>
+          <span class="confidence-pill conf-mid">Medium</span>
+        </div>
+        <div class="cc-passage">
+          "Public spaces belong to everyone — including people without housing. Our approach needs to reflect that value."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 12 · Community advocate</div>
+        </div>
+        <div class="cc-edit-area">
+          <textarea class="cc-edit-textarea" rows="2">Public spaces should be safe and accessible for all residents, including people experiencing homelessness.</textarea>
+          <div class="cc-edit-toolbar">
+            <span class="cc-edit-note"><i data-lucide="pencil"></i> Editing — refine the claim language before accepting</span>
+            <button class="cc-edit-save">Accept edited</button>
+            <button class="cc-edit-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENDING claim — needs review -->
+      <div class="claim-card">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-fact">Fact</span>
+          <div class="cc-text">Current shelter capacity across DPH-managed facilities is at 94% occupancy.</div>
+          <span class="confidence-pill conf-high">High</span>
+        </div>
+        <div class="cc-passage">
+          "We keep referring people to shelter waitlists that haven't moved in months. The capacity just isn't there."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 4 · Outreach worker</div>
+        </div>
+        <div class="cc-footer">
+          <button class="cc-action cc-accept"><i data-lucide="check"></i> Accept</button>
+          <button class="cc-action cc-edit"><i data-lucide="pencil"></i> Edit</button>
+          <button class="cc-action cc-reject"><i data-lucide="x"></i> Reject</button>
+        </div>
+      </div>
+
+      <!-- PENDING causal — low confidence, needs scrutiny -->
+      <div class="claim-card">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-causal">Causal</span>
+          <div class="cc-text">Mental health and addiction service gaps are the primary driver of visible homelessness in the downtown core.</div>
+          <span class="confidence-pill conf-low">Low</span>
+        </div>
+        <div class="cc-passage">
+          "Mental health and addiction services are chronically underfunded. You can't address visible homelessness without addressing the underlying health crisis."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 9 · Nonprofit representative</div>
+        </div>
+        <div style="margin: 0 14px 10px; padding: 7px 10px; background: #fff1f2; border: 1px solid #fda4af; border-radius: 5px; font-size: 11px; color: #9f1239; display: flex; align-items: flex-start; gap: 6px;">
+          <i data-lucide="alert-triangle" style="color:#dc2626; margin-top:1px; flex-shrink:0;"></i>
+          <span>Low confidence — the source says services are underfunded but does not explicitly state they are the <em>primary</em> driver. Consider editing to a weaker causal claim before accepting.</span>
+        </div>
+        <div class="cc-footer">
+          <button class="cc-action cc-accept"><i data-lucide="check"></i> Accept</button>
+          <button class="cc-action cc-edit"><i data-lucide="pencil"></i> Edit</button>
+          <button class="cc-action cc-reject"><i data-lucide="x"></i> Reject</button>
+        </div>
+      </div>
+
+      <!-- PENDING preference -->
+      <div class="claim-card">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-preference">Preference</span>
+          <div class="cc-text">Downtown business owners prefer enforcement-first approaches to visible encampments near commercial corridors.</div>
+          <span class="confidence-pill conf-mid">Medium</span>
+        </div>
+        <div class="cc-passage">
+          "Our members are seeing a 30% drop in foot traffic near encampment sites. This is an economic as well as a social problem."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 15 · BID representative</div>
+        </div>
+        <div class="cc-footer">
+          <button class="cc-action cc-accept"><i data-lucide="check"></i> Accept</button>
+          <button class="cc-action cc-edit"><i data-lucide="pencil"></i> Edit</button>
+          <button class="cc-action cc-reject"><i data-lucide="x"></i> Reject</button>
+        </div>
+      </div>
+
+      <!-- REJECTED claim -->
+      <div class="claim-card rejected">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-fact">Fact</span>
+          <div class="cc-text">SFPD has a 68% shelter offer rate at clearing sites.</div>
+          <span class="confidence-pill conf-high">High</span>
+        </div>
+        <div class="cc-passage">
+          "SFPD offers shelter to 68% of individuals at clearing sites. The issue is acceptance rates, not our offer rate."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 18 · SFPD representative</div>
+        </div>
+        <div class="cc-rejected-state">
+          <i data-lucide="x-circle"></i> Rejected — already exists as a contested claim in this issue
+          <span class="cc-undo" style="margin-left:auto;">Undo</span>
+        </div>
+      </div>
+
+      <!-- PENDING assumption -->
+      <div class="claim-card">
+        <div class="cc-header">
+          <span class="claim-type-badge ct-assumption">Assumption</span>
+          <div class="cc-text">Outreach teams can scale their capacity proportionally if housing placement is guaranteed as a condition of encampment clearing.</div>
+          <span class="confidence-pill conf-mid">Medium</span>
+        </div>
+        <div class="cc-passage">
+          "If there's a real housing offer on the table, we can move faster. The bottleneck right now is that we're sending people to waitlists, not placements."
+          <div class="cc-passage-ref"><i data-lucide="bookmark"></i> Page 11 · Outreach team lead</div>
+        </div>
+        <div class="cc-footer">
+          <button class="cc-action cc-accept"><i data-lucide="check"></i> Accept</button>
+          <button class="cc-action cc-edit"><i data-lucide="pencil"></i> Edit</button>
+          <button class="cc-action cc-reject"><i data-lucide="x"></i> Reject</button>
+        </div>
+      </div>
+
+      <div style="height:40px;"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="panel-header">
+      <i data-lucide="sparkles" style="color:#16a34a;"></i>
+      <span class="panel-header-title">Extraction Summary</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Review Progress</div>
+      <div class="progress-summary">
+        <div class="ps-row ps-accepted">
+          <span class="ps-label"><i data-lucide="check-circle"></i> Accepted</span>
+          <span class="ps-count">9</span>
+        </div>
+        <div class="ps-row ps-rejected">
+          <span class="ps-label"><i data-lucide="x-circle"></i> Rejected</span>
+          <span class="ps-count">2</span>
+        </div>
+        <div class="ps-row ps-pending">
+          <span class="ps-label"><i data-lucide="clock"></i> Pending</span>
+          <span class="ps-count">17</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Bulk Actions</div>
+      <div class="bulk-action">
+        <div class="ba-icon ba-accept"><i data-lucide="check-circle"></i></div>
+        <div class="ba-text">
+          <div class="ba-label">Accept all high-confidence</div>
+          <div class="ba-sub">8 claims with high confidence still pending</div>
+        </div>
+      </div>
+      <div class="bulk-action">
+        <div class="ba-icon ba-reject"><i data-lucide="x-circle"></i></div>
+        <div class="ba-text">
+          <div class="ba-label">Reject all low-confidence</div>
+          <div class="ba-sub">3 claims flagged as low confidence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Extraction Quality</div>
+      <div class="ai-box ai-box-green">
+        <strong><i data-lucide="sparkles"></i> Strong extraction</strong>
+        28 claims extracted from 24 pages — above average for a community meeting transcript. Fact and causal claims are well-supported by direct quotes.
+      </div>
+      <div class="ai-box ai-box-amber">
+        <strong><i data-lucide="alert-triangle"></i> 3 claims need scrutiny</strong>
+        One causal claim overreaches its source ("primary driver" language). Two preference claims attribute views to groups without direct quotes — edit or reject before accepting.
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">New vs. Existing</div>
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text-secondary);">
+        <div style="display:flex; justify-content:space-between;">
+          <span>New claims (not in issue)</span>
+          <span style="font-weight:700; color:var(--text-primary);">19</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Duplicate / existing</span>
+          <span style="font-weight:700; color:var(--text-primary);">6</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Contradicts existing claim</span>
+          <span style="font-weight:700; color:#dc2626;">3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Claim Types</div>
+      <div style="display:flex; flex-direction:column; gap:4px; font-size:11px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="flex:1; height:5px; border-radius:99px; background:var(--accent-light); overflow:hidden;">
+            <div style="width:35%; height:100%; background:#0369a1; border-radius:99px;"></div>
+          </div>
+          <span style="color:var(--text-secondary); white-space:nowrap;">Fact · 10</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="flex:1; height:5px; border-radius:99px; background:var(--accent-light); overflow:hidden;">
+            <div style="width:25%; height:100%; background:#5b21b6; border-radius:99px;"></div>
+          </div>
+          <span style="color:var(--text-secondary); white-space:nowrap;">Causal · 7</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="flex:1; height:5px; border-radius:99px; background:var(--accent-light); overflow:hidden;">
+            <div style="width:18%; height:100%; background:#92400e; border-radius:99px;"></div>
+          </div>
+          <span style="color:var(--text-secondary); white-space:nowrap;">Value · 5</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="flex:1; height:5px; border-radius:99px; background:var(--accent-light); overflow:hidden;">
+            <div style="width:14%; height:100%; background:#9d174d; border-radius:99px;"></div>
+          </div>
+          <span style="color:var(--text-secondary); white-space:nowrap;">Assumption · 4</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="flex:1; height:5px; border-radius:99px; background:var(--accent-light); overflow:hidden;">
+            <div style="width:7%; height:100%; background:#475569; border-radius:99px;"></div>
+          </div>
+          <span style="color:var(--text-secondary); white-space:nowrap;">Preference · 2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="finish-section">
+      <div class="finish-note">
+        Review all pending claims before finishing. Accepted claims will be added to the issue workspace. Rejected claims are discarded but remain in the source record.
+      </div>
+      <button class="btn btn-success" style="justify-content:center;"><i data-lucide="check-circle"></i> Finish Review</button>
+      <button class="btn" style="justify-content:center;"><i data-lucide="clock"></i> Save & continue later</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

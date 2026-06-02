@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deliberation Room — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+    --border-strong: #a3a3a3;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --text-muted: #a8a29e;
+    --accent: #292524;
+    --accent-light: #e7e5e4;
+
+    /* contribution type colors */
+    --c-support: #16a34a;
+    --c-support-bg: #f0fdf4;
+    --c-support-border: #86efac;
+    --c-oppose: #dc2626;
+    --c-oppose-bg: #fff1f2;
+    --c-oppose-border: #fda4af;
+    --c-question: #2563eb;
+    --c-question-bg: #eff6ff;
+    --c-question-border: #93c5fd;
+    --c-refine: #7c3aed;
+    --c-refine-bg: #f5f3ff;
+    --c-refine-border: #c4b5fd;
+    --c-evidence: #d97706;
+    --c-evidence-bg: #fffbeb;
+    --c-evidence-border: #fcd34d;
+
+    --sidebar-l: 240px;
+    --sidebar-r: 280px;
+    --header-h: 56px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .top-bar {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .org-logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-secondary); font-size: 12px;
+  }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+
+  .top-bar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-resolve {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+  }
+
+  .status-pill {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .status-open { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+  .status-resolved { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .status-unresolved { background: #fff1f2; color: #9f1239; border: 1px solid #fda4af; }
+
+  /* ─── PINNED OBJECT BANNER ────────────────────── */
+  .object-banner {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+
+  .object-banner-inner {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .object-type-badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .badge-causal { background: #ede9fe; color: #5b21b6; }
+  .badge-claim { background: #e0f2fe; color: #0369a1; }
+  .badge-proposal { background: #fef3c7; color: #92400e; }
+  .badge-assumption { background: #fce7f3; color: #9d174d; }
+
+  .object-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .object-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .object-meta-item {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .contested-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #fff1f2;
+    border: 1px solid #fda4af;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #9f1239;
+  }
+
+  .object-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+  /* ─── BODY ────────────────────────────────────── */
+  .body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── LEFT STANCE SIDEBAR ─────────────────────── */
+  .stance-sidebar {
+    width: var(--sidebar-l);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  /* Stance summary bar */
+  .stance-summary {
+    margin-bottom: 12px;
+  }
+
+  .stance-bar {
+    height: 8px;
+    border-radius: 99px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 6px;
+    gap: 1px;
+  }
+  .stance-seg { height: 100%; transition: width 0.3s; }
+  .seg-support { background: #22c55e; }
+  .seg-oppose  { background: #f87171; }
+  .seg-uncertain { background: #d1d5db; }
+
+  .stance-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .stance-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .legend-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Stakeholder stance cards */
+  .stance-card {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stance-icon {
+    width: 24px; height: 24px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .si-support { background: #dcfce7; }
+  .si-oppose  { background: #fee2e2; }
+  .si-question { background: #f1f5f9; }
+
+  .stance-card-body { flex: 1; min-width: 0; }
+  .stance-group-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stance-contribution-count {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .stance-label {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .sl-support { background: #dcfce7; color: #166534; }
+  .sl-oppose  { background: #fee2e2; color: #991b1b; }
+  .sl-uncertain { background: #f1f5f9; color: #475569; }
+
+  /* Facilitation tools */
+  .fac-btn {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fac-btn:hover { background: var(--bg); color: var(--text-primary); }
+  .fac-btn-icon { font-size: 14px; }
+
+  .related-object {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+  .related-object:hover { border-color: var(--border-strong); background: var(--bg); }
+  .related-type {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+  .related-text {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* ─── CENTER: CONTRIBUTIONS ───────────────────── */
+  .contributions-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .contributions-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Date divider */
+  .date-divider {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+  }
+  .date-divider::before,
+  .date-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Contribution card */
+  .contrib {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-left-width: 3px;
+    padding: 12px 14px;
+    position: relative;
+  }
+
+  .contrib-support  { border-left-color: var(--c-support); }
+  .contrib-oppose   { border-left-color: var(--c-oppose); }
+  .contrib-question { border-left-color: var(--c-question); }
+  .contrib-refine   { border-left-color: var(--c-refine); }
+  .contrib-evidence { border-left-color: var(--c-evidence); }
+
+  .contrib-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .contrib-avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .contrib-author { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+  .contrib-group  { font-size: 11px; color: var(--text-secondary); font-style: italic; }
+
+  .contrib-type-pill {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .pill-support  { background: var(--c-support-bg); color: var(--c-support); }
+  .pill-oppose   { background: var(--c-oppose-bg);  color: var(--c-oppose); }
+  .pill-question { background: var(--c-question-bg); color: var(--c-question); }
+  .pill-refine   { background: var(--c-refine-bg);  color: var(--c-refine); }
+  .pill-evidence { background: var(--c-evidence-bg); color: var(--c-evidence); }
+
+  .contrib-timestamp { font-size: 10px; color: var(--text-muted); }
+
+  .contrib-body {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .evidence-attachment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--c-evidence-bg);
+    border: 1px solid var(--c-evidence-border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    color: #92400e;
+  }
+  .evidence-attachment a { color: #92400e; font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+  .contrib-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .contrib-action {
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .contrib-action:hover { color: var(--text-secondary); }
+
+  .endorse-count {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* AI summary card */
+  .ai-summary-card {
+    background: #f0f9ff;
+    border: 1px solid #7dd3fc;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .ai-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .ai-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #0ea5e9;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  .ai-summary-title { font-size: 11px; font-weight: 700; color: #0369a1; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ai-summary-body { font-size: 12px; color: #0c4a6e; line-height: 1.6; }
+
+  /* ─── CONTRIBUTION COMPOSER ───────────────────── */
+  .composer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+
+  .composer-type-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .type-chip {
+    padding: 5px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.1s;
+  }
+  .type-chip.selected-support  { background: var(--c-support-bg); color: var(--c-support); border-color: var(--c-support-border); }
+  .type-chip.selected-oppose   { background: var(--c-oppose-bg);  color: var(--c-oppose);  border-color: var(--c-oppose-border); }
+  .type-chip.selected-question { background: var(--c-question-bg); color: var(--c-question); border-color: var(--c-question-border); }
+  .type-chip.selected-refine   { background: var(--c-refine-bg);  color: var(--c-refine);  border-color: var(--c-refine-border); }
+  .type-chip.selected-evidence { background: var(--c-evidence-bg); color: var(--c-evidence); border-color: var(--c-evidence-border); }
+  .type-chip:hover:not([class*="selected"]) { background: var(--bg); }
+
+  .composer-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .composer-textarea {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 60px;
+    line-height: 1.5;
+  }
+  .composer-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+  .composer-textarea::placeholder { color: var(--text-muted); }
+
+  .composer-submit { align-self: flex-end; }
+
+  .composer-hint {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ─── RIGHT AI PANEL ──────────────────────────── */
+  .ai-panel {
+    width: var(--sidebar-r);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .ai-panel-header {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-header-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2s infinite;
+  }
+  .ai-panel-title { font-size: 12px; font-weight: 700; }
+  .ai-panel-sub { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+
+  .ai-section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ai-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .ai-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .disagree-type {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .disagree-type-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+  }
+  .dt-evidentiary { color: #0369a1; }
+  .dt-causal      { color: #5b21b6; }
+  .dt-value       { color: #92400e; }
+  .dt-epistemic   { color: #065f46; }
+  .disagree-type-body { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+
+  .ai-question {
+    padding: 8px 10px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #166534;
+    margin-bottom: 6px;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .ai-question:hover { filter: brightness(0.97); }
+  .ai-question-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+
+  .ai-alert {
+    padding: 8px 10px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: #92400e;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .ai-alert strong { display: block; margin-bottom: 2px; }
+
+  .gap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .gap-item:last-child { border-bottom: none; }
+  .gap-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; margin-top: 5px; }
+
+  .ai-footer {
+    padding: 10px 14px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ai-footer-btn {
+    width: 100%;
+    padding: 7px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: center;
+  }
+  .ai-footer-btn:hover { background: var(--bg); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ─── LUCIDE ICONS ───────────────────────────── */
+  [data-lucide] {
+    width: 13px; height: 13px;
+    display: inline-flex;
+    vertical-align: middle;
+    flex-shrink: 0;
+    stroke-width: 2;
+    color: currentColor;
+  }
+
+  /* Stance icons — color-coded to match stance meaning */
+  .stance-icon [data-lucide]  { width: 15px; height: 15px; }
+  .si-support  [data-lucide]  { color: var(--c-support); }
+  .si-oppose   [data-lucide]  { color: var(--c-oppose); }
+  .si-question [data-lucide]  { color: var(--text-secondary); }
+
+  /* Facilitation button icons */
+  .fac-btn-icon [data-lucide] {
+    width: 14px; height: 14px;
+    color: var(--text-secondary);
+  }
+  /* AI sparkles gets a sky-blue tint to signal AI context */
+  i[data-lucide="sparkles"] { color: #0ea5e9; }
+
+  /* Contribution type pill icons — inherit pill text color */
+  .contrib-type-pill [data-lucide] {
+    width: 11px; height: 11px;
+    color: inherit;
+    margin-right: 2px;
+  }
+
+  /* Composer type-chip icons — inherit chip color when selected */
+  .type-chip [data-lucide] {
+    width: 12px; height: 12px;
+    color: inherit;
+  }
+
+  /* Contribution footer action icons */
+  .contrib-action [data-lucide] {
+    width: 12px; height: 12px;
+    color: inherit;
+    margin-right: 3px;
+  }
+
+  /* Evidence attachment icon */
+  .evidence-attachment > [data-lucide] {
+    width: 14px; height: 14px;
+    color: var(--c-evidence);
+    flex-shrink: 0;
+  }
+
+  /* AI alert icons — match amber warn tone */
+  .ai-alert [data-lucide] {
+    width: 13px; height: 13px;
+    color: #d97706;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* AI footer button icons */
+  .ai-footer-btn [data-lucide] {
+    width: 13px; height: 13px;
+    color: var(--text-secondary);
+    margin-right: 4px;
+  }
+</style>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>SF Planning</span>
+    <span class="sep">/</span>
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span>Deliberations</span>
+    <span class="sep">/</span>
+    <span class="current">Encampment Clearing & Health Costs</span>
+  </div>
+  <span class="status-pill status-open">Open</span>
+  <div class="top-bar-right">
+    <button class="btn">Invite</button>
+    <button class="btn btn-resolve">✓ Mark Resolved</button>
+    <button class="btn btn-primary">Close Deliberation</button>
+  </div>
+</div>
+
+<!-- PINNED OBJECT BANNER -->
+<div class="object-banner">
+  <div class="object-banner-inner">
+    <span class="object-type-badge badge-causal">Causal Claim</span>
+    <div style="flex:1">
+      <div class="object-text">"Clearing encampments without housing placement increases recidivism and downstream health costs."</div>
+      <div class="object-meta">
+        <span class="object-meta-item">📄 Outreach Worker Interviews Q1</span>
+        <span class="object-meta-item">· From Issue: Downtown Homelessness Response</span>
+        <span class="contested-tag">⚡ Contested</span>
+        <span class="object-meta-item" style="color:var(--text-muted)">Opened Jun 1 by D. Okonkwo</span>
+      </div>
+    </div>
+    <div class="object-actions">
+      <button class="btn">View Claim</button>
+      <button class="btn">Add Evidence</button>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- LEFT: STANCE SIDEBAR -->
+  <div class="stance-sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Stance Overview</div>
+      <div class="stance-summary">
+        <div class="stance-bar">
+          <div class="stance-seg seg-support" style="width:50%"></div>
+          <div class="stance-seg seg-oppose" style="width:33%"></div>
+          <div class="stance-seg seg-uncertain" style="width:17%"></div>
+        </div>
+        <div class="stance-legend">
+          <span class="stance-legend-item"><span class="legend-dot" style="background:#22c55e"></span>Support (3)</span>
+          <span class="stance-legend-item"><span class="legend-dot" style="background:#f87171"></span>Oppose (2)</span>
+          <span class="stance-legend-item"><span class="legend-dot" style="background:#d1d5db"></span>Uncertain (1)</span>
+        </div>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-support"><i data-lucide="thumbs-up"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">Outreach Workers</div>
+          <div class="stance-contribution-count">4 contributions</div>
+        </div>
+        <span class="stance-label sl-support">Support</span>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-support"><i data-lucide="thumbs-up"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">Public Health (DPH)</div>
+          <div class="stance-contribution-count">3 contributions</div>
+        </div>
+        <span class="stance-label sl-support">Support</span>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-support"><i data-lucide="thumbs-up"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">Housing Nonprofits</div>
+          <div class="stance-contribution-count">2 contributions</div>
+        </div>
+        <span class="stance-label sl-support">Support</span>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-oppose"><i data-lucide="thumbs-down"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">Downtown BID</div>
+          <div class="stance-contribution-count">3 contributions</div>
+        </div>
+        <span class="stance-label sl-oppose">Oppose</span>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-oppose"><i data-lucide="thumbs-down"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">Police Dept (SFPD)</div>
+          <div class="stance-contribution-count">2 contributions</div>
+        </div>
+        <span class="stance-label sl-oppose">Oppose</span>
+      </div>
+
+      <div class="stance-card">
+        <div class="stance-icon si-question"><i data-lucide="circle-help"></i></div>
+        <div class="stance-card-body">
+          <div class="stance-group-name">City Council</div>
+          <div class="stance-contribution-count">1 contribution</div>
+        </div>
+        <span class="stance-label sl-uncertain">Unclear</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Facilitation</div>
+      <button class="fac-btn">
+        <span class="fac-btn-icon"><i data-lucide="sparkles"></i></span>
+        AI Synthesis on demand
+      </button>
+      <button class="fac-btn">
+        <span class="fac-btn-icon"><i data-lucide="zap"></i></span>
+        Classify this conflict
+      </button>
+      <button class="fac-btn">
+        <span class="fac-btn-icon"><i data-lucide="pin"></i></span>
+        Pin a bridge statement
+      </button>
+      <button class="fac-btn">
+        <span class="fac-btn-icon"><i data-lucide="git-branch-plus"></i></span>
+        Split into sub-deliberations
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Related Objects</div>
+
+      <div class="related-object">
+        <div class="related-type">Uncertainty</div>
+        <div class="related-text">Effect of sanctioned encampments on displacement rates</div>
+      </div>
+
+      <div class="related-object">
+        <div class="related-type">Assumption</div>
+        <div class="related-text">Outreach capacity can scale if housing placement is guaranteed</div>
+      </div>
+
+      <div class="related-object">
+        <div class="related-type">Evidence</div>
+        <div class="related-text">Shelter Utilization Data 2023–2026 (CSV)</div>
+      </div>
+
+      <div class="related-object">
+        <div class="related-type">Claim (Value)</div>
+        <div class="related-text">Public spaces should be accessible for all, including unhoused individuals</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER: CONTRIBUTION STREAM -->
+  <div class="contributions-area">
+    <div class="contributions-scroll">
+
+      <div class="date-divider">May 31, 2026</div>
+
+      <!-- OPPOSE -->
+      <div class="contrib contrib-oppose">
+        <div class="contrib-header">
+          <div class="contrib-avatar">JL</div>
+          <span class="contrib-author">J. Liu</span>
+          <span class="contrib-group">Downtown BID</span>
+          <span class="contrib-type-pill pill-oppose"><i data-lucide="thumbs-down"></i> Oppose</span>
+          <span class="contrib-timestamp">9:14am</span>
+        </div>
+        <div class="contrib-body">
+          This claim conflates correlation with causation. We don't have evidence that encampment clearing itself drives health costs — the health needs existed before the clearing. The issue is the absence of services, not the clearing operation itself.
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="link"></i> Link evidence</span>
+          <span class="contrib-action"><i data-lucide="zap"></i> Dispute claim type</span>
+          <span class="endorse-count">1 endorse</span>
+        </div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="contrib contrib-support">
+        <div class="contrib-header">
+          <div class="contrib-avatar">MC</div>
+          <span class="contrib-author">M. Chen</span>
+          <span class="contrib-group">Public Health (DPH)</span>
+          <span class="contrib-type-pill pill-support"><i data-lucide="thumbs-up"></i> Support</span>
+          <span class="contrib-timestamp">10:02am</span>
+        </div>
+        <div class="contrib-body">
+          The causal pathway is well-established in the literature. When people are displaced without housing placement they lose continuity of care, miss medication, and often enter emergency services at higher acuity. The downstream cost increase is documented across several US cities.
+        </div>
+        <div class="evidence-attachment">
+          <i data-lucide="paperclip"></i> <a>UCSF Housing First Cost Study, 2024</a> — "Emergency room visits increased 40% in the 6 months following non-placement sweeps…"
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="link"></i> Link evidence</span>
+          <span class="endorse-count">4 endorses</span>
+        </div>
+      </div>
+
+      <!-- QUESTION -->
+      <div class="contrib contrib-question">
+        <div class="contrib-header">
+          <div class="contrib-avatar">RW</div>
+          <span class="contrib-author">R. Washington</span>
+          <span class="contrib-group">City Council</span>
+          <span class="contrib-type-pill pill-question"><i data-lucide="circle-help"></i> Question</span>
+          <span class="contrib-timestamp">10:31am</span>
+        </div>
+        <div class="contrib-body">
+          Does the UCSF study account for differences in the local context — specifically that SF's sanctioned encampment model in 2024 did include some case management? Are we comparing apples to apples here?
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="link"></i> Link evidence</span>
+          <span class="endorse-count">3 endorses</span>
+        </div>
+      </div>
+
+      <!-- REFINE -->
+      <div class="contrib contrib-refine">
+        <div class="contrib-header">
+          <div class="contrib-avatar">DO</div>
+          <span class="contrib-author">D. Okonkwo</span>
+          <span class="contrib-group">Outreach Workers</span>
+          <span class="contrib-type-pill pill-refine"><i data-lucide="pencil"></i> Refine</span>
+          <span class="contrib-timestamp">11:08am</span>
+        </div>
+        <div class="contrib-body">
+          I'd suggest refining the claim to be more specific: <em>"Clearing encampments without a guaranteed housing offer at the point of clearing increases emergency service utilization within 90 days."</em> This makes the causal mechanism testable against our own data, and may reduce the framing dispute.
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="pencil"></i> Apply refinement to claim</span>
+          <span class="endorse-count">6 endorses</span>
+        </div>
+      </div>
+
+      <!-- AI SYNTHESIS CARD (mid-stream) -->
+      <div class="ai-summary-card">
+        <div class="ai-summary-header">
+          <div class="ai-dot"></div>
+          <span class="ai-summary-title">AI Mid-Deliberation Synthesis — Jun 1, 11:30am</span>
+        </div>
+        <div class="ai-summary-body">
+          The core dispute appears to be <strong>evidentiary and definitional</strong>, not purely value-based. Both sides accept that displacement without services causes harm — the disagreement is about whether "encampment clearing" is the causal mechanism or a neutral action whose harm depends entirely on what accompanies it. D. Okonkwo's proposed refinement (11:08am) may resolve this: 6 of 6 respondents endorsed it. Facilitator may want to call a vote on adopting the refined claim language.
+        </div>
+      </div>
+
+      <div class="date-divider">Jun 1, 2026</div>
+
+      <!-- OPPOSE -->
+      <div class="contrib contrib-oppose">
+        <div class="contrib-header">
+          <div class="contrib-avatar">KP</div>
+          <span class="contrib-author">K. Petrov</span>
+          <span class="contrib-group">Police Dept (SFPD)</span>
+          <span class="contrib-type-pill pill-oppose"><i data-lucide="thumbs-down"></i> Oppose</span>
+          <span class="contrib-timestamp">8:45am</span>
+        </div>
+        <div class="contrib-body">
+          We support the refinement direction but want it on record that SFPD operations always include a referral offer. The current claim language implies we are not offering placement when we are. Our data shows 68% of individuals at cleared sites are offered shelter — the issue is acceptance rates, not the offer.
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="link"></i> Link evidence</span>
+          <span class="endorse-count">2 endorses</span>
+        </div>
+      </div>
+
+      <!-- EVIDENCE -->
+      <div class="contrib contrib-evidence">
+        <div class="contrib-header">
+          <div class="contrib-avatar">SN</div>
+          <span class="contrib-author">S. Nakamura</span>
+          <span class="contrib-group">Housing Nonprofits</span>
+          <span class="contrib-type-pill pill-evidence"><i data-lucide="paperclip"></i> Add Evidence</span>
+          <span class="contrib-timestamp">9:22am</span>
+        </div>
+        <div class="contrib-body">
+          Adding counter-evidence to SFPD's 68% figure: our community intake data shows only 31% of post-sweep clients self-report receiving a concrete shelter placement (vs. a shelter referral slip). A referral is not the same as a placement. This distinction matters for the refined claim.
+        </div>
+        <div class="evidence-attachment">
+          <i data-lucide="paperclip"></i> <a>HomewardBound Intake Data Q1 2026 (anonymized)</a> — "31% of post-sweep intakes report receiving shelter placement on date of sweep…"
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="library"></i> Add to evidence library</span>
+          <span class="endorse-count">5 endorses</span>
+        </div>
+      </div>
+
+      <!-- SUPPORT (recent) -->
+      <div class="contrib contrib-support">
+        <div class="contrib-header">
+          <div class="contrib-avatar">TR</div>
+          <span class="contrib-author">T. Reyes</span>
+          <span class="contrib-group">Outreach Workers</span>
+          <span class="contrib-type-pill pill-support"><i data-lucide="thumbs-up"></i> Support</span>
+          <span class="contrib-timestamp">10:48am</span>
+        </div>
+        <div class="contrib-body">
+          The referral vs. placement distinction (S. Nakamura, 9:22am) is the crux. In my experience, a referral without a confirmed bed is experienced as no offer at all. People know the waitlists. This is why acceptance rates appear low — it's rational, not irrational.
+        </div>
+        <div class="contrib-footer">
+          <span class="contrib-action"><i data-lucide="corner-down-left"></i> Reply</span>
+          <span class="contrib-action"><i data-lucide="link"></i> Link evidence</span>
+          <span class="endorse-count">7 endorses</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COMPOSER -->
+    <div class="composer">
+      <div class="composer-type-row">
+        <span style="font-size:11px;color:var(--text-muted);font-weight:600;align-self:center;margin-right:4px;">Type:</span>
+        <button class="type-chip" onclick="selectType(this,'support')"><i data-lucide="thumbs-up"></i> Support</button>
+        <button class="type-chip" onclick="selectType(this,'oppose')"><i data-lucide="thumbs-down"></i> Oppose</button>
+        <button class="type-chip" onclick="selectType(this,'question')"><i data-lucide="circle-help"></i> Question</button>
+        <button class="type-chip selected-refine" onclick="selectType(this,'refine')"><i data-lucide="pencil"></i> Refine</button>
+        <button class="type-chip" onclick="selectType(this,'evidence')"><i data-lucide="paperclip"></i> Add Evidence</button>
+      </div>
+      <div class="composer-input-row">
+        <textarea class="composer-textarea" placeholder="Refine the claim language or scope — propose specific wording changes…"></textarea>
+        <button class="btn btn-primary composer-submit">Submit</button>
+      </div>
+      <div class="composer-hint">Your contribution will be attributed to you and your stakeholder group. Contributions cannot be deleted after submission.</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: AI PANEL -->
+  <div class="ai-panel">
+    <div class="ai-panel-header">
+      <div class="ai-header-dot"></div>
+      <span class="ai-panel-title">Deliberation Intelligence</span>
+      <span class="ai-panel-sub">15 contributions</span>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Current State</div>
+      <p class="ai-text">The deliberation has moved from a values dispute toward a definitional one. There is emerging consensus around D. Okonkwo's claim refinement (6 endorses). The key open question is now empirical: <strong>does SFPD's 68% offer rate translate to actual placements?</strong> S. Nakamura's counter-data (31%) creates a factual dispute that should be resolved before the claim is finalized.</p>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Disagreement Breakdown</div>
+      <div class="disagree-type">
+        <div class="disagree-type-label dt-evidentiary">Evidentiary</div>
+        <div class="disagree-type-body">SFPD 68% offer rate vs. HomewardBound 31% placement rate — same event, different measures</div>
+      </div>
+      <div class="disagree-type">
+        <div class="disagree-type-label dt-causal">Definitional</div>
+        <div class="disagree-type-body">Is a "referral" equivalent to a "placement offer"? This is the root of the acceptance rate dispute</div>
+      </div>
+      <div class="disagree-type">
+        <div class="disagree-type-label dt-value">Value (latent)</div>
+        <div class="disagree-type-body">Whether "rational non-acceptance" (knowing waitlists are full) is a failure of the individual or the system</div>
+      </div>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Suggested Facilitator Questions</div>
+      <div class="ai-question">
+        <div class="ai-question-label">For SFPD</div>
+        Can you share the operational definition of "offer" used in the 68% figure — specifically, does it require a confirmed bed reservation?
+      </div>
+      <div class="ai-question">
+        <div class="ai-question-label">For All Groups</div>
+        If we adopt D. Okonkwo's refined claim language, does the SFPD figure of 68% meet the bar of "guaranteed housing offer"?
+      </div>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Evidence Gaps</div>
+      <div class="gap-item"><span class="gap-dot"></span>No data on health outcomes specifically for individuals who declined an offer — needed to test the causal claim</div>
+      <div class="gap-item"><span class="gap-dot"></span>SFPD operational definition of "shelter offer" not yet in evidence library</div>
+      <div class="gap-item"><span class="gap-dot"></span>No comparable data from post-placement sweeps to establish a counterfactual</div>
+    </div>
+
+    <div class="ai-section">
+      <div class="ai-section-title">Alerts</div>
+      <div class="ai-alert">
+        <strong><i data-lucide="alert-triangle"></i> Latent value dispute</strong>
+        The "rational non-acceptance" framing (T. Reyes, 10:48am) signals an underlying values conflict that may resurface even if the evidentiary dispute is resolved.
+      </div>
+    </div>
+
+    <div class="ai-footer">
+      <button class="ai-footer-btn"><i data-lucide="refresh-cw"></i> Refresh synthesis</button>
+      <button class="ai-footer-btn"><i data-lucide="clipboard-list"></i> Export deliberation record</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  lucide.createIcons();
+
+  function selectType(el, type) {
+    document.querySelectorAll('.type-chip').forEach(c => {
+      c.className = 'type-chip';
+    });
+    el.classList.add('selected-' + type);
+
+    lucide.createIcons();
+    const placeholders = {
+      support: 'Add an argument or evidence in support of this claim…',
+      oppose: 'Explain your objection — what is wrong with this claim or its evidence?',
+      question: 'Ask a clarifying question about this claim, its evidence, or its scope…',
+      refine: 'Propose a refinement — suggest specific changes to the claim language or scope…',
+      evidence: 'Describe or link the evidence you are adding to this deliberation…'
+    };
+    document.querySelector('.composer-textarea').placeholder = placeholders[type] || '';
+  }
+</script>
+
+</body>
+</html>

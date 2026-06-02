@@ -13,6 +13,12 @@ async function getInvoice(id: string) {
   })
 }
 
+async function getExistingRating(fromMemberId: string, transactionId: string) {
+  return prisma.reputationEvent.findFirst({
+    where: { fromMemberId, transactionId },
+  })
+}
+
 export default async function InvoicePage({
   params,
 }: {
@@ -33,6 +39,16 @@ export default async function InvoicePage({
 
   const canApprove = isBuyer && invoice.status === "SENT"
   const canCancel = isSeller && invoice.status === "SENT"
+
+  // Rating: shown on PAID invoices; one rating per direction per transaction
+  const existingRating =
+    invoice.status === "PAID" && invoice.transactionId
+      ? await getExistingRating(memberId, invoice.transactionId)
+      : null
+  const canRate =
+    invoice.status === "PAID" && invoice.transactionId && !existingRating
+  // Rater reviews the other party
+  const ratedMemberId = isBuyer ? invoice.sellerId : invoice.buyerId
 
   const creditAmount = Number(invoice.creditAmount)
   const cashAmount = Number(invoice.cashAmount)
@@ -171,6 +187,43 @@ export default async function InvoicePage({
     redirect("/invoices" as Route)
   }
 
+  async function submitRating(formData: FormData) {
+    "use server"
+    const session = await auth()
+    const fromMemberId = session?.user.memberId
+    if (!fromMemberId) redirect("/login" as Route)
+
+    const inv = await prisma.invoice.findUniqueOrThrow({ where: { id } })
+    if (inv.status !== "PAID" || !inv.transactionId) redirect(`/invoices/${id}` as Route)
+
+    const toMemberId =
+      inv.buyerId === fromMemberId ? inv.sellerId : inv.buyerId
+    const score = parseInt(formData.get("score") as string)
+    const comment = (formData.get("comment") as string).trim() || null
+
+    if (isNaN(score) || score < 1 || score > 5) redirect(`/invoices/${id}` as Route)
+
+    // Prevent duplicate
+    const existing = await prisma.reputationEvent.findFirst({
+      where: { fromMemberId, transactionId: inv.transactionId },
+    })
+    if (existing) redirect(`/invoices/${id}` as Route)
+
+    await prisma.reputationEvent.create({
+      data: {
+        fromMemberId,
+        toMemberId,
+        transactionId: inv.transactionId,
+        score,
+        comment,
+        dimension: "OVERALL",
+        editableUntil: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      },
+    })
+
+    redirect(`/invoices/${id}?rated=1` as Route)
+  }
+
   return (
     <div className="p-8">
       <div className="mb-6 flex items-center gap-3">
@@ -288,6 +341,59 @@ export default async function InvoicePage({
         {invoice.rejectionNote && (
           <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
             Rejected: {invoice.rejectionNote}
+          </div>
+        )}
+
+        {/* Rating prompt */}
+        {canRate && (
+          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4">
+            <p className="text-sm font-medium text-gray-900">
+              Rate this exchange
+            </p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              How did it go? Ratings are visible to all members.
+            </p>
+            <form action={submitRating} className="mt-3 space-y-3">
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label key={n} className="flex cursor-pointer flex-col items-center gap-1">
+                    <input type="radio" name="score" value={n} required className="sr-only peer" />
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-sm text-gray-400 peer-checked:border-gray-900 peer-checked:bg-gray-900 peer-checked:text-white">
+                      {n}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      {["Poor", "Fair", "Good", "Great", "★"][n - 1]}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <textarea
+                name="comment"
+                rows={2}
+                placeholder="Optional comment (visible to all members)"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              />
+              <button
+                type="submit"
+                className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+              >
+                Submit rating
+              </button>
+            </form>
+          </div>
+        )}
+
+        {existingRating && (
+          <div className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4 text-sm text-gray-500">
+            You rated this exchange{" "}
+            <span className="font-medium text-gray-900">
+              {existingRating.score}/5
+            </span>
+            {existingRating.comment && (
+              <span className="ml-1 text-gray-600">
+                — &ldquo;{existingRating.comment}&rdquo;
+              </span>
+            )}
           </div>
         )}
       </div>

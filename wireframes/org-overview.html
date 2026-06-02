@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organization Overview — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+    --border-strong: #a3a3a3;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --text-muted: #a8a29e;
+    --accent: #292524;
+    --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3;
+    --warn-border: #eab308;
+    --warn-text: #713f12;
+    --ai-bg: #f0fdf4;
+    --ai-border: #86efac;
+    --header-h: 56px;
+    --sidebar-w: 240px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .top-bar {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 12px; flex-shrink: 0;
+  }
+  .org-logo {
+    width: 28px; height: 28px; background: var(--accent);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .org-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+  .org-type { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-primary);
+    font-size: 12px; cursor: pointer; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.85; }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #dbeafe; color: #1d4ed8;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer;
+  }
+
+  /* ─── BODY ────────────────────────────────────── */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── LEFT NAV ────────────────────────────────── */
+  .left-nav {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto; flex-shrink: 0;
+    padding: 16px 0;
+  }
+  .nav-section { padding: 0 10px; margin-bottom: 20px; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+    padding: 0 8px; margin-bottom: 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 6px;
+    font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; margin-bottom: 1px;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-light); color: var(--text-primary); font-weight: 600; }
+  .nav-item [data-lucide] { color: var(--text-muted); flex-shrink: 0; }
+  .nav-item.active [data-lucide] { color: var(--text-primary); }
+  .nav-count {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    background: var(--accent-light); color: var(--text-secondary);
+    padding: 1px 6px; border-radius: 99px;
+  }
+  .nav-alert {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #dc2626; margin-left: auto; flex-shrink: 0;
+  }
+
+  /* Search bar */
+  .search-bar {
+    margin: 0 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 10px;
+  }
+  .search-bar [data-lucide] { color: var(--text-muted); flex-shrink: 0; }
+  .search-input {
+    flex: 1; border: none; background: transparent;
+    font-size: 12px; color: var(--text-primary); outline: none;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  /* ─── MAIN CONTENT ────────────────────────────── */
+  .main {
+    flex: 1; overflow-y: auto;
+    padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  /* Org header */
+  .org-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .org-header-left {}
+  .org-header-title {
+    font-size: 20px; font-weight: 800; margin-bottom: 4px;
+  }
+  .org-header-sub {
+    font-size: 12px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .org-header-sub [data-lucide] { color: var(--text-muted); }
+
+  /* Org-level stats */
+  .stat-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1; min-width: 120px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .stat-value { font-size: 26px; font-weight: 800; color: var(--text-primary); }
+  .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+  .stat-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .stat-card.alert-card { border-color: #fca5a5; background: #fff8f8; }
+  .stat-card.alert-card .stat-value { color: #dc2626; }
+
+  /* Alert banner */
+  .org-alert-banner {
+    background: var(--warn-bg); border: 1px solid var(--warn-border);
+    border-radius: 8px; padding: 10px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 12px; color: var(--warn-text); line-height: 1.5;
+  }
+  .org-alert-banner [data-lucide] { color: #d97706; margin-top: 1px; flex-shrink: 0; }
+
+  /* Issues section */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .section-title { font-size: 14px; font-weight: 700; }
+  .section-action { font-size: 12px; color: #2563eb; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .section-action [data-lucide] { color: #2563eb; }
+
+  /* Issue cards */
+  .issue-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;
+  }
+
+  .issue-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+    cursor: pointer; position: relative;
+    transition: box-shadow 0.15s;
+  }
+  .issue-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: var(--border-strong); }
+  .issue-card.has-alert { border-left: 3px solid #d97706; }
+  .issue-card.phase-locked { opacity: 0.55; cursor: default; }
+
+  .ic-status-row {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  }
+  .ic-status {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px; letter-spacing: 0.04em;
+  }
+  .ics-draft        { background: #f1f5f9; color: #475569; }
+  .ics-active       { background: #dbeafe; color: #1d4ed8; }
+  .ics-deliberating { background: #fef3c7; color: #92400e; }
+  .ics-decided      { background: #dcfce7; color: #166534; }
+  .ics-monitoring   { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+  .ic-alert-dot     { width: 6px; height: 6px; border-radius: 50%; background: #d97706; flex-shrink: 0; }
+
+  .ic-title { font-size: 13px; font-weight: 600; line-height: 1.35; margin-bottom: 6px; }
+  .ic-desc  { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .ic-meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 10px; color: var(--text-muted); margin-bottom: 10px;
+  }
+  .ic-meta-item { display: flex; align-items: center; gap: 3px; }
+  .ic-meta-item [data-lucide] { color: var(--text-muted); }
+  .ic-meta-item.alert-item { color: #d97706; }
+  .ic-meta-item.alert-item [data-lucide] { color: #d97706; }
+
+  .ic-bar {
+    height: 4px; border-radius: 99px; background: var(--accent-light);
+    overflow: hidden; margin-bottom: 8px;
+  }
+  .ic-bar-fill { height: 100%; border-radius: 99px; }
+  .fill-low    { background: #f87171; }
+  .fill-mid    { background: #fbbf24; }
+  .fill-high   { background: #34d399; }
+
+  .ic-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10px; color: var(--text-muted);
+  }
+  .ic-members { display: flex; gap: 2px; }
+  .ic-member-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent-light); border: 2px solid white;
+    font-size: 8px; font-weight: 700; color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    margin-left: -4px;
+  }
+  .ic-member-dot:first-child { margin-left: 0; }
+  .ic-last-activity { color: var(--text-muted); font-size: 10px; }
+
+  /* Phase-locked card */
+  .phase-lock-badge {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--text-muted); margin-bottom: 6px;
+  }
+  .phase-lock-badge [data-lucide] { color: var(--text-muted); }
+
+  /* Decisions row */
+  .decision-list { display: flex; flex-direction: column; gap: 8px; }
+  .decision-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; cursor: pointer;
+  }
+  .decision-row:hover { background: #fafaf9; border-color: var(--border-strong); }
+  .dr-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dr-final    { background: #dcfce7; }
+  .dr-final [data-lucide]    { color: #16a34a; }
+  .dr-draft    { background: #fef3c7; }
+  .dr-draft [data-lucide]    { color: #d97706; }
+  .dr-info { flex: 1; min-width: 0; }
+  .dr-title  { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.35; }
+  .dr-meta   { font-size: 11px; color: var(--text-secondary); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .dr-meta [data-lucide] { color: var(--text-muted); }
+  .dr-status {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+  }
+  .drs-final { background: #dcfce7; color: #166534; }
+  .drs-draft { background: #fef3c7; color: #92400e; }
+
+  /* Activity feed */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .act-icon {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; background: var(--accent-light);
+  }
+  .act-icon [data-lucide] { color: var(--text-secondary); }
+  .act-icon.act-claim    { background: #ede9fe; }
+  .act-icon.act-claim    [data-lucide] { color: #5b21b6; }
+  .act-icon.act-source   { background: #fee2e2; }
+  .act-icon.act-source   [data-lucide] { color: #dc2626; }
+  .act-icon.act-decision { background: #dcfce7; }
+  .act-icon.act-decision [data-lucide] { color: #16a34a; }
+  .act-icon.act-delib    { background: #dbeafe; }
+  .act-icon.act-delib    [data-lucide] { color: #2563eb; }
+  .act-icon.act-alert    { background: #fef3c7; }
+  .act-icon.act-alert    [data-lucide] { color: #d97706; }
+  .act-body { flex: 1; }
+  .act-text { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+  .act-text strong { font-weight: 600; }
+  .act-text a { color: #2563eb; text-decoration: none; cursor: pointer; }
+  .act-time { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel {
+    width: 260px; flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .panel-header {
+    padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px;
+  }
+
+  /* Members */
+  .member-item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 0;
+  }
+  .member-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; flex-shrink: 0;
+  }
+  .member-info { flex: 1; min-width: 0; }
+  .member-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .member-role { font-size: 10px; color: var(--text-muted); }
+  .member-role-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+  }
+  .role-steward { background: #fef3c7; color: #92400e; }
+  .role-facilitator { background: #ede9fe; color: #5b21b6; }
+  .role-evidence { background: #e0f2fe; color: #0369a1; }
+  .role-participant { background: var(--accent-light); color: var(--text-secondary); }
+
+  .ai-pulse-box {
+    background: var(--ai-bg); border: 1px solid var(--ai-border);
+    border-radius: 6px; padding: 10px 12px;
+    font-size: 11px; color: #166534; line-height: 1.55;
+    margin-bottom: 8px;
+  }
+  .ai-pulse-box strong { display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 4px; }
+  .ai-pulse-box [data-lucide] { color: #16a34a; }
+  .ai-warn-box {
+    background: var(--warn-bg); border: 1px solid var(--warn-border);
+    border-radius: 6px; padding: 10px 12px;
+    font-size: 11px; color: var(--warn-text); line-height: 1.55;
+    margin-bottom: 8px;
+  }
+  .ai-warn-box strong { display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 4px; }
+  .ai-warn-box [data-lucide] { color: #d97706; }
+
+  /* ─── LUCIDE ICONS ────────────────────────────── */
+  [data-lucide] {
+    width: 13px; height: 13px;
+    display: inline-flex; vertical-align: middle;
+    flex-shrink: 0; stroke-width: 2;
+    color: currentColor;
+  }
+  .nav-item [data-lucide]        { width: 15px; height: 15px; }
+  .search-bar [data-lucide]      { width: 14px; height: 14px; }
+  .panel-header [data-lucide]    { width: 15px; height: 15px; }
+  .dr-icon [data-lucide]         { width: 16px; height: 16px; }
+  .act-icon [data-lucide]        { width: 13px; height: 13px; }
+  .ic-meta-item [data-lucide]    { width: 11px; height: 11px; }
+  .org-alert-banner [data-lucide]{ width: 15px; height: 15px; }
+  .section-action [data-lucide]  { width: 12px; height: 12px; }
+  .phase-lock-badge [data-lucide]{ width: 12px; height: 12px; }
+  .ai-pulse-box [data-lucide]    { width: 13px; height: 13px; }
+  .ai-warn-box [data-lucide]     { width: 13px; height: 13px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div>
+    <div class="org-name">SF Planning Dept</div>
+    <div class="org-type">Government agency · 9 members</div>
+  </div>
+  <div class="top-bar-right">
+    <button class="btn"><i data-lucide="search"></i> Search memory</button>
+    <button class="btn btn-primary"><i data-lucide="plus"></i> New Issue</button>
+    <div class="avatar">AP</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- LEFT NAV -->
+  <div class="left-nav">
+    <div class="search-bar">
+      <i data-lucide="search"></i>
+      <input class="search-input" placeholder="Search issues, claims, decisions…" />
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Issues</div>
+      <div class="nav-item active"><i data-lucide="layout-dashboard"></i> All Issues <span class="nav-count">5</span></div>
+      <div class="nav-item"><i data-lucide="circle-dot"></i> Active <span class="nav-count">2</span></div>
+      <div class="nav-item"><i data-lucide="message-square"></i> Deliberating <span class="nav-count">1</span></div>
+      <div class="nav-item"><i data-lucide="check-circle"></i> Decided <span class="nav-count">1</span></div>
+      <div class="nav-item"><i data-lucide="activity"></i> Monitoring <span class="nav-count">1</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item"><i data-lucide="file-text"></i> Decisions <span class="nav-count">3</span></div>
+      <div class="nav-item"><i data-lucide="file-check"></i> Proposals <span class="nav-count">6</span></div>
+      <div class="nav-item"><i data-lucide="message-square-quote"></i> Claims <span class="nav-count">82</span></div>
+      <div class="nav-item"><i data-lucide="folder-open"></i> Sources <span class="nav-count">24</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Attention needed</div>
+      <div class="nav-item"><i data-lucide="alert-triangle"></i> Missing voices <span class="nav-alert"></span></div>
+      <div class="nav-item"><i data-lucide="zap"></i> Contested claims <span class="nav-count">6</span></div>
+      <div class="nav-item"><i data-lucide="circle-dashed"></i> Untested assumptions <span class="nav-count">4</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Org</div>
+      <div class="nav-item"><i data-lucide="users"></i> Members</div>
+      <div class="nav-item"><i data-lucide="settings"></i> Settings</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- Org header -->
+    <div class="org-header">
+      <div class="org-header-left">
+        <div class="org-header-title">SF Planning Dept</div>
+        <div class="org-header-sub">
+          <span><i data-lucide="calendar"></i> Active since Mar 2026</span>
+          <span><i data-lucide="users"></i> 9 members</span>
+          <span><i data-lucide="layers"></i> 5 issues</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert banner -->
+    <div class="org-alert-banner">
+      <i data-lucide="alert-triangle"></i>
+      <span><strong>2 issues require attention:</strong> The Downtown Homelessness Response issue has a pending decision with 2 untested assumptions; the Transit Equity issue has 3 stakeholder groups with no representation. Review before proceeding.</span>
+    </div>
+
+    <!-- Stat row -->
+    <div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Active Issues</div>
+          <div class="stat-sub">2 deliberating, 1 decided</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">82</div>
+          <div class="stat-label">Claims Extracted</div>
+          <div class="stat-sub">6 contested, 4 accepted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Decision Records</div>
+          <div class="stat-sub">1 finalized, 2 in draft</div>
+        </div>
+        <div class="stat-card alert-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Missing Voices</div>
+          <div class="stat-sub">Across 3 issues</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">Issues</span>
+        <span class="section-action"><i data-lucide="plus"></i> New Issue</span>
+      </div>
+      <div class="issue-grid">
+
+        <!-- Issue 1 — deliberating, has alert -->
+        <div class="issue-card has-alert">
+          <div class="ic-status-row">
+            <span class="ic-status ics-deliberating">Deliberating</span>
+            <span class="ic-alert-dot"></span>
+          </div>
+          <div class="ic-title">Downtown Homelessness Response</div>
+          <div class="ic-desc">How should the city respond to rising homelessness in the downtown core? Tensions between emergency response and structural housing investment.</div>
+          <div class="ic-meta">
+            <span class="ic-meta-item"><i data-lucide="message-square-quote"></i> 34 claims</span>
+            <span class="ic-meta-item"><i data-lucide="users"></i> 6 stakeholders</span>
+            <span class="ic-meta-item"><i data-lucide="file-check"></i> 3 proposals</span>
+            <span class="ic-meta-item alert-item"><i data-lucide="alert-triangle"></i> Decision pending</span>
+          </div>
+          <div class="ic-bar"><div class="ic-bar-fill fill-high" style="width:72%;"></div></div>
+          <div class="ic-footer">
+            <div class="ic-members">
+              <div class="ic-member-dot">DO</div>
+              <div class="ic-member-dot">MC</div>
+              <div class="ic-member-dot">KP</div>
+              <div class="ic-member-dot">+6</div>
+            </div>
+            <span class="ic-last-activity">Active 2h ago</span>
+          </div>
+        </div>
+
+        <!-- Issue 2 — active -->
+        <div class="issue-card has-alert">
+          <div class="ic-status-row">
+            <span class="ic-status ics-active">Active</span>
+            <span class="ic-alert-dot"></span>
+          </div>
+          <div class="ic-title">Transit Equity & Accessibility Gaps</div>
+          <div class="ic-desc">Evaluating gaps in public transit coverage across lower-income neighborhoods and identifying service improvement priorities.</div>
+          <div class="ic-meta">
+            <span class="ic-meta-item"><i data-lucide="message-square-quote"></i> 18 claims</span>
+            <span class="ic-meta-item"><i data-lucide="users"></i> 4 stakeholders</span>
+            <span class="ic-meta-item"><i data-lucide="folder-open"></i> 6 sources</span>
+            <span class="ic-meta-item alert-item"><i data-lucide="alert-triangle"></i> 3 missing voices</span>
+          </div>
+          <div class="ic-bar"><div class="ic-bar-fill fill-mid" style="width:38%;"></div></div>
+          <div class="ic-footer">
+            <div class="ic-members">
+              <div class="ic-member-dot">RT</div>
+              <div class="ic-member-dot">SN</div>
+              <div class="ic-member-dot">+3</div>
+            </div>
+            <span class="ic-last-activity">Active 1d ago</span>
+          </div>
+        </div>
+
+        <!-- Issue 3 — monitoring -->
+        <div class="issue-card">
+          <div class="ic-status-row">
+            <span class="ic-status ics-monitoring">Monitoring</span>
+          </div>
+          <div class="ic-title">Civic Center Public Space Activation</div>
+          <div class="ic-desc">Following the 2025 activation decision, monitoring usage metrics, safety indicators, and community satisfaction quarterly.</div>
+          <div class="ic-meta">
+            <span class="ic-meta-item"><i data-lucide="activity"></i> 4 indicators tracked</span>
+            <span class="ic-meta-item"><i data-lucide="calendar"></i> Next review Aug 2026</span>
+          </div>
+          <div class="ic-bar"><div class="ic-bar-fill fill-high" style="width:88%;"></div></div>
+          <div class="ic-footer">
+            <div class="ic-members">
+              <div class="ic-member-dot">AP</div>
+              <div class="ic-member-dot">JL</div>
+            </div>
+            <span class="ic-last-activity">Updated 3d ago</span>
+          </div>
+        </div>
+
+        <!-- Issue 4 — decided -->
+        <div class="issue-card">
+          <div class="ic-status-row">
+            <span class="ic-status ics-decided">Decided</span>
+          </div>
+          <div class="ic-title">Short-Term Rental Regulation Framework</div>
+          <div class="ic-desc">Establishing a balanced regulatory framework for Airbnb-style rentals that protects housing supply while supporting property owner flexibility.</div>
+          <div class="ic-meta">
+            <span class="ic-meta-item"><i data-lucide="file-text"></i> Decision finalized Jan 2026</span>
+            <span class="ic-meta-item"><i data-lucide="activity"></i> 2 indicators linked</span>
+          </div>
+          <div class="ic-bar"><div class="ic-bar-fill fill-high" style="width:100%;"></div></div>
+          <div class="ic-footer">
+            <div class="ic-members">
+              <div class="ic-member-dot">TK</div>
+              <div class="ic-member-dot">+4</div>
+            </div>
+            <span class="ic-last-activity">Decided Jan 14, 2026</span>
+          </div>
+        </div>
+
+        <!-- Issue 5 — draft -->
+        <div class="issue-card">
+          <div class="ic-status-row">
+            <span class="ic-status ics-draft">Draft</span>
+          </div>
+          <div class="ic-title">Commercial Vacancy & Storefront Activation</div>
+          <div class="ic-desc">Exploring policy levers to address rising commercial vacancy rates in neighborhood commercial corridors post-pandemic.</div>
+          <div class="ic-meta">
+            <span class="ic-meta-item"><i data-lucide="folder-open"></i> 2 sources</span>
+            <span class="ic-meta-item"><i data-lucide="message-square-quote"></i> 5 claims</span>
+          </div>
+          <div class="ic-bar"><div class="ic-bar-fill fill-low" style="width:12%;"></div></div>
+          <div class="ic-footer">
+            <div class="ic-members">
+              <div class="ic-member-dot">AP</div>
+            </div>
+            <span class="ic-last-activity">Created May 12, 2026</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Decision records -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">Decision Records</span>
+        <span class="section-action"><i data-lucide="arrow-right"></i> View all</span>
+      </div>
+      <div class="decision-list">
+        <div class="decision-row">
+          <div class="dr-icon dr-draft"><i data-lucide="file-edit"></i></div>
+          <div class="dr-info">
+            <div class="dr-title">Encampment Response Policy — Downtown Core</div>
+            <div class="dr-meta">
+              <span><i data-lucide="layers"></i> Downtown Homelessness Response</span>
+              <span><i data-lucide="user"></i> D. Okonkwo</span>
+              <span><i data-lucide="calendar"></i> Target: Jun 14, 2026</span>
+            </div>
+          </div>
+          <span class="dr-status drs-draft">Draft</span>
+        </div>
+        <div class="decision-row">
+          <div class="dr-icon dr-final"><i data-lucide="check-square"></i></div>
+          <div class="dr-info">
+            <div class="dr-title">Short-Term Rental Regulation Framework</div>
+            <div class="dr-meta">
+              <span><i data-lucide="layers"></i> STR Regulation</span>
+              <span><i data-lucide="user"></i> T. Kim</span>
+              <span><i data-lucide="calendar"></i> Finalized Jan 14, 2026</span>
+            </div>
+          </div>
+          <span class="dr-status drs-final">Finalized</span>
+        </div>
+        <div class="decision-row">
+          <div class="dr-icon dr-final"><i data-lucide="check-square"></i></div>
+          <div class="dr-info">
+            <div class="dr-title">Civic Center Public Space Activation Plan</div>
+            <div class="dr-meta">
+              <span><i data-lucide="layers"></i> Civic Center</span>
+              <span><i data-lucide="user"></i> A. Park</span>
+              <span><i data-lucide="calendar"></i> Finalized Nov 3, 2025</span>
+            </div>
+          </div>
+          <span class="dr-status drs-final">Finalized</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">Recent Activity</span>
+        <span class="section-action"><i data-lucide="arrow-right"></i> Full log</span>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="act-icon act-decision"><i data-lucide="file-check"></i></div>
+          <div class="act-body">
+            <div class="act-text"><strong>D. Okonkwo</strong> revised the <a>Encampment Response Policy</a> decision record to Revision 2 — added SFPD dissent</div>
+            <div class="act-time">2 hours ago · Downtown Homelessness Response</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon act-delib"><i data-lucide="message-square-quote"></i></div>
+          <div class="act-body">
+            <div class="act-text"><strong>K. Petrov</strong> submitted an OPPOSE contribution to the <a>Encampment Clearing deliberation</a></div>
+            <div class="act-time">8 hours ago · Downtown Homelessness Response</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon act-claim"><i data-lucide="zap"></i></div>
+          <div class="act-body">
+            <div class="act-text"><strong>J. Liu</strong> contested the claim "Clearing without placement increases downstream health costs"</div>
+            <div class="act-time">Yesterday · Downtown Homelessness Response</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon act-source"><i data-lucide="file-text"></i></div>
+          <div class="act-body">
+            <div class="act-text"><strong>S. Nakamura</strong> uploaded <a>Transit Ridership Survey 2026.csv</a> — AI extraction in progress</div>
+            <div class="act-time">1 day ago · Transit Equity</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon act-alert"><i data-lucide="alert-triangle"></i></div>
+          <div class="act-body">
+            <div class="act-text">AI flagged <strong>3 missing voices</strong> in the Transit Equity issue — low-income rider groups referenced in 4 sources but unrepresented</div>
+            <div class="act-time">1 day ago · Transit Equity</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon act-claim"><i data-lucide="message-square-quote"></i></div>
+          <div class="act-body">
+            <div class="act-text"><strong>M. Chen</strong> accepted AI-extracted claim: "SFPD shelter offer rate has not been independently audited"</div>
+            <div class="act-time">2 days ago · Downtown Homelessness Response</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px;"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="panel-header">
+      <i data-lucide="sparkles" style="color:#16a34a;"></i>
+      <span class="panel-header-title">Org Intelligence</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">AI Pulse</div>
+      <div class="ai-pulse-box">
+        <strong><i data-lucide="sparkles"></i> Decision moment approaching</strong>
+        The Downtown Homelessness Response issue has strong deliberative momentum. The core contested claim has near-consensus on refined language. Two untested assumptions remain — resolving them would clear the path to finalization.
+      </div>
+      <div class="ai-warn-box">
+        <strong><i data-lucide="alert-triangle"></i> Representation gap</strong>
+        Unhoused Residents are the primary affected group in your most active issue but have no recorded perspective or position on any proposal. Decisions made without their input carry legitimacy risk.
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Members (9)</div>
+      <div class="member-item">
+        <div class="member-avatar" style="background:#fef3c7; color:#92400e;">DO</div>
+        <div class="member-info">
+          <div class="member-name">D. Okonkwo</div>
+          <div class="member-role">Outreach Workers</div>
+        </div>
+        <span class="member-role-badge role-steward">Steward</span>
+      </div>
+      <div class="member-item">
+        <div class="member-avatar" style="background:#ede9fe; color:#5b21b6;">JL</div>
+        <div class="member-info">
+          <div class="member-name">J. Liu</div>
+          <div class="member-role">Downtown BID</div>
+        </div>
+        <span class="member-role-badge role-facilitator">Facilitator</span>
+      </div>
+      <div class="member-item">
+        <div class="member-avatar" style="background:#e0f2fe; color:#0369a1;">MC</div>
+        <div class="member-info">
+          <div class="member-name">M. Chen</div>
+          <div class="member-role">Public Health (DPH)</div>
+        </div>
+        <span class="member-role-badge role-evidence">Evidence</span>
+      </div>
+      <div class="member-item">
+        <div class="member-avatar" style="background:#f0fdf4; color:#166534;">KP</div>
+        <div class="member-info">
+          <div class="member-name">K. Petrov</div>
+          <div class="member-role">Police Dept (SFPD)</div>
+        </div>
+        <span class="member-role-badge role-participant">Participant</span>
+      </div>
+      <div class="member-item">
+        <div class="member-avatar" style="background:#fff1f2; color:#9f1239;">SN</div>
+        <div class="member-info">
+          <div class="member-name">S. Nakamura</div>
+          <div class="member-role">City Council</div>
+        </div>
+        <span class="member-role-badge role-participant">Participant</span>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:#2563eb; cursor:pointer; display:flex; align-items:center; gap:4px;">
+        <i data-lucide="plus"></i> Invite member
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Platform Phase</div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#dcfce7; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="check" style="color:#16a34a; width:11px; height:11px;"></i></div>
+          <span style="font-size:12px; color:var(--text-primary); font-weight:500;">Ph 1 — Issue Memory & AI</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:5px 0; background:#f0f9ff; border-radius:5px; padding:5px 7px;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#2563eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="circle-dot" style="color:white; width:11px; height:11px;"></i></div>
+          <span style="font-size:12px; color:#1d4ed8; font-weight:700;">Ph 2 — Deliberation (active)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:5px 0; opacity:0.45;">
+          <div style="width:20px; height:20px; border-radius:50%; background:var(--accent-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="lock" style="color:var(--text-muted); width:11px; height:11px;"></i></div>
+          <span style="font-size:12px; color:var(--text-muted);">Ph 3 — Systems Mapping</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:5px 0; opacity:0.45;">
+          <div style="width:20px; height:20px; border-radius:50%; background:var(--accent-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="lock" style="color:var(--text-muted); width:11px; height:11px;"></i></div>
+          <span style="font-size:12px; color:var(--text-muted);">Ph 4 — Scenario Planning</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; padding:5px 0; opacity:0.45;">
+          <div style="width:20px; height:20px; border-radius:50%; background:var(--accent-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="lock" style="color:var(--text-muted); width:11px; height:11px;"></i></div>
+          <span style="font-size:12px; color:var(--text-muted);">Ph 5 — Monitoring</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

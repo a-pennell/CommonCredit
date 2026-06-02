@@ -888,7 +888,94 @@
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ─── LUCIDE ICONS ───────────────────────────── */
+  [data-lucide] {
+    width: 13px; height: 13px;
+    display: inline-flex;
+    vertical-align: middle;
+    flex-shrink: 0;
+    stroke-width: 2;
+    color: currentColor;
+  }
+
+  /* Upload zone hero icon */
+  .upload-zone-icon [data-lucide] { width: 30px; height: 30px; }
+  .upload-zone-icon { line-height: 1; }
+
+  /* Source type icons */
+  .source-icon [data-lucide] { width: 16px; height: 16px; }
+  .icon-pdf [data-lucide]  { color: #dc2626; }
+  .icon-doc [data-lucide]  { color: #2563eb; }
+  .icon-csv [data-lucide]  { color: #16a34a; }
+  .icon-txt [data-lucide]  { color: #78716c; }
+
+  /* Alert / warning icons — slightly larger and color-matched */
+  .alert-icon [data-lucide] {
+    width: 15px; height: 15px;
+    color: var(--warn-border);  /* amber #eab308, distinct from warn-text brown */
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Missing-voice banner alert icon */
+  .sh-missing-banner [data-lucide] {
+    width: 13px; height: 13px;
+    color: var(--warn-border);
+    flex-shrink: 0;
+  }
+
+  /* AI panel alert icons — match warn-text amber */
+  .ai-alert [data-lucide] {
+    width: 13px; height: 13px;
+    color: var(--warn-border);
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* AI suggestion icons — use AI accent green */
+  .ai-suggestion [data-lucide] {
+    width: 13px; height: 13px;
+    color: #16a34a;
+    flex-shrink: 0;
+    margin-right: 4px;
+  }
+  /* Zap in AI suggestions signals a conceptual/classification insight, not an action */
+  .ai-suggestion i[data-lucide="zap"] { color: #d97706; }
+
+  /* Claim source icons */
+  .claim-source [data-lucide] {
+    width: 12px; height: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Contested tag zap icon — inherit contested-text red */
+  .tag.contested [data-lucide] {
+    width: 11px; height: 11px;
+    color: inherit;
+  }
+
+  /* Accept / reject button icons — inherit button text color */
+  .action-btn [data-lucide] {
+    width: 12px; height: 12px;
+    color: inherit;
+    margin-right: 3px;
+  }
+
+  /* Pin / tag icons in claim count rows */
+  .claim-count [data-lucide] {
+    width: 12px; height: 12px;
+    color: var(--text-muted);
+  }
+
+  /* AI refresh button icon */
+  .ai-refresh [data-lucide] {
+    width: 13px; height: 13px;
+    color: var(--text-secondary);
+    margin-right: 4px;
+  }
 </style>
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -1045,7 +1132,7 @@
               <span class="tag">Enforcement</span>
               <span class="tag">Mental Health</span>
               <span class="tag">Shelter Capacity</span>
-              <span class="tag contested">⚡ Contested</span>
+              <span class="tag contested"><i data-lucide="zap"></i> Contested</span>
             </div>
           </div>
         </div>
@@ -1106,7 +1193,7 @@
       <div id="sources" class="panel">
 
         <div class="alert-box alert-warn">
-          <span class="alert-icon">⚠</span>
+          <span class="alert-icon"><i data-lucide="alert-triangle"></i></span>
           <div class="alert-body">
             <div class="alert-title">1 source still processing</div>
             AI extraction in progress for "March Community Meeting Transcript.pdf". Claims and themes will appear when complete.
@@ -1114,13 +1201,13 @@
         </div>
 
         <div class="upload-zone">
-          <div class="upload-zone-icon">⬆</div>
+          <div class="upload-zone-icon"><i data-lucide="upload"></i></div>
           <div class="upload-zone-title">Drop files here or click to upload</div>
           <div>PDF, DOCX, TXT, CSV, audio — or paste text directly</div>
         </div>
 
         <div class="source-item">
-          <div class="source-icon icon-pdf">📄</div>
+          <div class="source-icon icon-pdf"><i data-lucide="file-text"></i></div>
           <div class="source-meta">
             <div class="source-title">Public Comments — Winter 2026 Survey</div>
             <div class="source-sub">PDF · 847 comments · Uploaded May 28 by R. Torres</div>
@@ -1129,15 +1216,15 @@
               <span class="tag">Public input</span>
             </div>
             <div class="source-action-row">
-              <span class="claim-count">📌 18 claims extracted</span>
-              <span class="claim-count">🏷 5 themes contributed</span>
+              <span class="claim-count"><i data-lucide="pin"></i> 18 claims extracted</span>
+              <span class="claim-count"><i data-lucide="tag"></i> 5 themes contributed</span>
             </div>
           </div>
           <button class="action-btn">View</button>
         </div>
 
         <div class="source-item">
-          <div class="source-icon icon-doc">📝</div>
+          <div class="source-icon icon-doc"><i data-lucide="file-pen-line"></i></div>
           <div class="source-meta">
             <div class="source-title">March Community Meeting Transcript.pdf</div>
             <div class="source-sub">PDF · Transcript · Uploaded Jun 1 by D. Okonkwo</div>
@@ -1147,14 +1234,14 @@
             </div>
             <div class="processing-bar"><div class="processing-fill"></div></div>
             <div class="source-action-row" style="margin-top:6px">
-              <span class="claim-count" style="color:#f59e0b">⏳ Processing…</span>
+              <span class="claim-count" style="color:#f59e0b"><i data-lucide="loader"></i> Processing…</span>
             </div>
           </div>
           <button class="action-btn">View</button>
         </div>
 
         <div class="source-item">
-          <div class="source-icon icon-csv">📊</div>
+          <div class="source-icon icon-csv"><i data-lucide="bar-chart-2"></i></div>
           <div class="source-meta">
             <div class="source-title">Shelter Utilization Data 2023–2026</div>
             <div class="source-sub">CSV · Dataset · 3,200 rows · Uploaded Apr 18 by J. Kim</div>
@@ -1163,14 +1250,14 @@
               <span class="tag">HSA</span>
             </div>
             <div class="source-action-row">
-              <span class="claim-count">📌 6 claims extracted</span>
+              <span class="claim-count"><i data-lucide="pin"></i> 6 claims extracted</span>
             </div>
           </div>
           <button class="action-btn">View</button>
         </div>
 
         <div class="source-item">
-          <div class="source-icon icon-doc">📝</div>
+          <div class="source-icon icon-doc"><i data-lucide="file-pen-line"></i></div>
           <div class="source-meta">
             <div class="source-title">Outreach Worker Interviews — Q1 2026</div>
             <div class="source-sub">DOCX · Qualitative · 12 interviews · Uploaded May 2 by M. Chen</div>
@@ -1179,8 +1266,8 @@
               <span class="tag">Qualitative</span>
             </div>
             <div class="source-action-row">
-              <span class="claim-count">📌 10 claims extracted</span>
-              <span class="claim-count">🏷 3 themes contributed</span>
+              <span class="claim-count"><i data-lucide="pin"></i> 10 claims extracted</span>
+              <span class="claim-count"><i data-lucide="tag"></i> 3 themes contributed</span>
             </div>
           </div>
           <button class="action-btn">View</button>
@@ -1206,8 +1293,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">4 sources · 22 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1222,8 +1309,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">6 sources · 41 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1238,8 +1325,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">5 sources · 28 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1254,8 +1341,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">3 sources · 17 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1270,8 +1357,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">1 source · 5 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1286,8 +1373,8 @@
             <div class="theme-footer">
               <span class="theme-source-count">2 sources · 8 passages</span>
               <div class="theme-actions">
-                <button class="action-btn accept">✓ Accept</button>
-                <button class="action-btn reject">✕</button>
+                <button class="action-btn accept"><i data-lucide="check"></i> Accept</button>
+                <button class="action-btn reject"><i data-lucide="x"></i></button>
               </div>
             </div>
           </div>
@@ -1313,7 +1400,7 @@
           <div class="claim-body">
             <div class="claim-text">Unsheltered homelessness in San Francisco increased 35% between 2022 and 2025.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📄 HSA Point-in-Time Count 2025</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> HSA Point-in-Time Count 2025</span>
               <span class="claim-stakeholder">HSA</span>
             </div>
           </div>
@@ -1327,9 +1414,9 @@
           <div class="claim-body">
             <div class="claim-text">Clearing encampments without housing placement increases recidivism and downstream health costs.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📝 Outreach Interviews Q1</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> Outreach Interviews Q1</span>
               <span class="claim-stakeholder">Outreach workers, Public Health</span>
-              <span class="tag contested" style="font-size:10px;">⚡ Contested</span>
+              <span class="tag contested" style="font-size:10px;"><i data-lucide="zap"></i> Contested</span>
             </div>
           </div>
           <div class="claim-actions">
@@ -1343,7 +1430,7 @@
           <div class="claim-body">
             <div class="claim-text">Public spaces should be accessible and safe for all residents, including unhoused individuals.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📄 Public Comments Survey</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> Public Comments Survey</span>
               <span class="claim-stakeholder">Housing advocates, Lived-experience</span>
             </div>
           </div>
@@ -1357,9 +1444,9 @@
           <div class="claim-body">
             <div class="claim-text">Visible encampments in the downtown core are the primary driver of reduced foot traffic and business revenue.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📄 BID Survey 2025</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> BID Survey 2025</span>
               <span class="claim-stakeholder">Downtown BID</span>
-              <span class="tag contested" style="font-size:10px;">⚡ Contested</span>
+              <span class="tag contested" style="font-size:10px;"><i data-lucide="zap"></i> Contested</span>
             </div>
           </div>
           <div class="claim-actions">
@@ -1373,7 +1460,7 @@
           <div class="claim-body">
             <div class="claim-text">If housing placement is offered alongside outreach, a significant proportion of unsheltered individuals will accept it.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📝 DPH Housing-First Literature</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> DPH Housing-First Literature</span>
               <span class="claim-stakeholder">Public Health Dept</span>
             </div>
           </div>
@@ -1387,7 +1474,7 @@
           <div class="claim-body">
             <div class="claim-text">Emergency enforcement responses should not be substituted for structural housing investment.</div>
             <div class="claim-meta-row">
-              <span class="claim-source">📝 Outreach Interviews Q1</span>
+              <span class="claim-source"><i data-lucide="file-text"></i> Outreach Interviews Q1</span>
               <span class="claim-stakeholder">Housing nonprofits, Outreach workers</span>
             </div>
           </div>
@@ -1402,7 +1489,7 @@
       <div id="stakeholders" class="panel">
 
         <div class="alert-box alert-warn">
-          <span class="alert-icon">⚠</span>
+          <span class="alert-icon"><i data-lucide="alert-triangle"></i></span>
           <div class="alert-body">
             <div class="alert-title">2 missing voices detected</div>
             Unhoused residents and hospital discharge planners are referenced in source material but have no perspective entry. Consider adding their perspectives or uploading relevant testimony.
@@ -1434,7 +1521,7 @@
                 <span style="font-size:11px;color:var(--text-secondary)">Perspective draft — needs review</span>
               </div>
             </div>
-            <div class="sh-missing-banner">⚠ Only 1 source covers this group's direct voice</div>
+            <div class="sh-missing-banner"><i data-lucide="alert-triangle"></i> Only 1 source covers this group's direct voice</div>
           </div>
 
           <div class="sh-card">
@@ -1531,7 +1618,7 @@
                 <span style="font-size:11px;color:var(--text-secondary)">No perspective — <a href="#" style="color:var(--text-primary)">Add now</a></span>
               </div>
             </div>
-            <div class="sh-missing-banner">⚠ Missing voice — mentioned in 3 sources but unrepresented</div>
+            <div class="sh-missing-banner"><i data-lucide="alert-triangle"></i> Missing voice — mentioned in 3 sources but unrepresented</div>
           </div>
 
         </div>
@@ -1610,20 +1697,20 @@
     <div class="ai-section">
       <div class="ai-section-title">Alerts</div>
       <div class="ai-alert">
-        <strong>⚠ Missing voices</strong>
+        <strong><i data-lucide="alert-triangle"></i> Missing voices</strong>
         Unhoused residents and hospital discharge planners are referenced frequently but have minimal direct testimony. Decisions made without these perspectives carry legitimacy risk.
       </div>
       <div class="ai-alert">
-        <strong>⚠ Contested causal link</strong>
+        <strong><i data-lucide="alert-triangle"></i> Contested causal link</strong>
         The claim that encampment clearing increases downstream costs is central to the debate but currently backed by only 1 source. This assumption should be surfaced explicitly in the decision record.
       </div>
     </div>
 
     <div class="ai-section">
       <div class="ai-section-title">Suggested Actions</div>
-      <div class="ai-suggestion">📌 Add perspective for "Unhoused Residents" — referenced in 3 sources but no perspective entry exists</div>
-      <div class="ai-suggestion">🔗 Link shelter capacity data (CSV source) to the uncertainty "supportive housing pipeline timeline"</div>
-      <div class="ai-suggestion">⚡ The "enforcement vs harm reduction" conflict may be rooted in a value disagreement — consider classifying it as such in the conflict view</div>
+      <div class="ai-suggestion"><i data-lucide="pin"></i> Add perspective for "Unhoused Residents" — referenced in 3 sources but no perspective entry exists</div>
+      <div class="ai-suggestion"><i data-lucide="link"></i> Link shelter capacity data (CSV source) to the uncertainty "supportive housing pipeline timeline"</div>
+      <div class="ai-suggestion"><i data-lucide="zap"></i> The "enforcement vs harm reduction" conflict may be rooted in a value disagreement — consider classifying it as such in the conflict view</div>
     </div>
 
     <div class="ai-section">
@@ -1652,7 +1739,7 @@
     </div>
 
     <div class="ai-footer">
-      <button class="ai-refresh">↻ Regenerate synthesis</button>
+      <button class="ai-refresh"><i data-lucide="refresh-cw"></i> Regenerate synthesis</button>
     </div>
   </div>
 
@@ -1670,6 +1757,7 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
   }
+  lucide.createIcons();
 </script>
 </body>
 </html>
