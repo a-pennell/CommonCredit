@@ -189,9 +189,13 @@ export default async function ProposalPage({
 
         {/* Body */}
         <div className="mb-6 rounded-lg border border-gray-200 bg-white p-5">
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-gray-700">
-            {proposal.body}
-          </pre>
+          <div className="space-y-3">
+            {proposal.body.split("\n\n").map((para, i) => (
+              <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
+                {para}
+              </p>
+            ))}
+          </div>
         </div>
 
         {/* Vote tally */}

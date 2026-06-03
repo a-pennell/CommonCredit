@@ -67,15 +67,22 @@ async function ApplyForm({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-8">
         <div className="w-full max-w-md text-center">
-          <div className="mb-4 text-4xl">✓</div>
-          <h1 className="text-xl font-semibold text-gray-900">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700 text-xl">
+            ✓
+          </div>
+          <h1 className="mt-3 text-xl font-semibold text-gray-900">
             Application received
           </h1>
           <p className="mt-2 text-sm text-gray-500">
             We&apos;ll review your application and follow up at the email you
-            provided. CommonCredit members vote on new admissions, so this may
-            take a few days.
+            provided. This typically takes a few days.
           </p>
+          <a
+            href="/"
+            className="mt-6 inline-block text-sm text-gray-500 hover:text-gray-800 hover:underline"
+          >
+            ← Back to home
+          </a>
         </div>
       </div>
     )
@@ -94,6 +101,12 @@ async function ApplyForm({
           <p className="mt-2 text-sm text-gray-500">
             CommonCredit is a mutual credit network where members trade goods
             and services using a shared currency. Membership is by application.
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            Already a member?{" "}
+            <a href="/login" className="font-medium text-gray-900 hover:underline">
+              Sign in →
+            </a>
           </p>
         </div>
 

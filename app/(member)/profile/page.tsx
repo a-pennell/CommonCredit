@@ -90,23 +90,25 @@ export default async function ProfilePage({
         {/* Account */}
         {balance !== null && (
           <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <p className="mb-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Account
-            </p>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+                Account
+              </p>
+              <a
+                href="/profile/credit-request"
+                className="text-xs text-gray-500 hover:text-gray-800 hover:underline"
+              >
+                Request limit change →
+              </a>
+            </div>
             <dl className="space-y-2 text-sm">
               <Row
                 label="Balance"
                 value={`${balance >= 0 ? "+" : ""}${balance.toFixed(2)} CC`}
                 valueClass={balance < 0 ? "text-red-600 font-medium" : "font-medium"}
               />
-              <Row
-                label="Credit limit"
-                value={`+${creditLimit?.toFixed(0)} CC`}
-              />
-              <Row
-                label="Debit limit"
-                value={`${debitLimit?.toFixed(0)} CC`}
-              />
+              <Row label="Credit limit" value={`+${creditLimit?.toFixed(0)} CC`} />
+              <Row label="Debit limit" value={`${debitLimit?.toFixed(0)} CC`} />
             </dl>
           </div>
         )}
