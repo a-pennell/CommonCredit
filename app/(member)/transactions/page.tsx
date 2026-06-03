@@ -176,6 +176,13 @@ export default async function TransactionsPage() {
           <h1 className="text-xl font-semibold text-gray-900">Transactions</h1>
           <p className="mt-0.5 text-sm text-gray-500">Your ledger history</p>
         </div>
+        <div className="flex flex-col items-end gap-2">
+          <a
+            href="/api/export/statement"
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+          >
+            Export CSV ↓
+          </a>
         <div className="text-right">
           <p className="text-xs text-gray-400">Current balance</p>
           <p className={`text-2xl font-semibold ${balance >= 0 ? "text-gray-900" : "text-red-600"}`}>
@@ -184,6 +191,7 @@ export default async function TransactionsPage() {
           <p className="text-xs text-gray-400">
             Limits: {Number(account.debitLimit).toFixed(0)} / +{Number(account.creditLimit).toFixed(0)} CC
           </p>
+        </div>
         </div>
       </div>
 
