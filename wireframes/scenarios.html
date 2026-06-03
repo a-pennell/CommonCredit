@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scenario Planning — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f4; --surface: #ffffff; --border: #d4d4d4;
+    --border-strong: #a3a3a3; --text-primary: #1c1917;
+    --text-secondary: #78716c; --text-muted: #a8a29e;
+    --accent: #292524; --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3; --warn-border: #eab308; --warn-text: #713f12;
+    --ai-bg: #f0fdf4; --ai-border: #86efac; --header-h: 56px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 13px; line-height: 1.5; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  .top-bar { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+  .org-logo { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12px; }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 12px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .vt-btn { padding: 4px 11px; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text-secondary); background: var(--surface); border: none; display: flex; align-items: center; gap: 4px; }
+  .vt-btn.active { background: var(--accent); color: white; }
+  .vt-btn [data-lucide] { width: 12px; height: 12px; }
+
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── LEFT SIDEBAR ────────────────────────────── */
+  .sidebar { width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .sidebar-header { padding: 12px 12px 8px; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+
+  .scenario-card { padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .scenario-card:hover { background: #fafaf9; }
+  .scenario-card.selected { background: #f0f9ff; border-left: 3px solid #2563eb; }
+  .sc-header { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .sc-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .sc-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .sc-status { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; margin-left: auto; }
+  .scs-draft     { background: #f1f5f9; color: #475569; }
+  .scs-published { background: #dcfce7; color: #166534; }
+  .sc-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 5px; }
+  .sc-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 8px; }
+  .sc-meta [data-lucide] { color: var(--text-muted); }
+
+  .add-scenario-btn { padding: 10px 12px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+  .add-scenario-btn:hover { color: var(--text-primary); background: var(--bg); }
+
+  /* ─── MAIN ────────────────────────────────────── */
+  .main { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .scenario-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .scenario-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .scenario-badge { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; display: inline-block; }
+  .scenario-meta { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .scenario-meta [data-lucide] { color: var(--text-muted); }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .section-header { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+  .section-header [data-lucide] { color: var(--text-muted); }
+  .section-body { padding: 14px 16px; }
+
+  /* Narrative */
+  .narrative { font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+  .narrative p + p { margin-top: 8px; }
+
+  /* Assumptions */
+  .assumption-grid { display: flex; flex-direction: column; gap: 8px; }
+  .assump-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; }
+  .assump-item.critical { border-color: #fca5a5; background: #fff8f8; }
+  .assump-item.uncertain { border-color: #c4b5fd; background: #faf5ff; }
+  .assump-num { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-light); color: var(--text-secondary); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .assump-body { flex: 1; }
+  .assump-text { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+  .assump-status { font-size: 10px; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+  .assump-status [data-lucide] { width: 10px; height: 10px; }
+  .as-tested   { color: #16a34a; }
+  .as-untested { color: #d97706; }
+  .as-critical { color: #dc2626; }
+  .assump-risk { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+  .ar-high { background: #fee2e2; color: #9f1239; }
+  .ar-med  { background: #fef3c7; color: #92400e; }
+  .ar-low  { background: #f1f5f9; color: #64748b; }
+
+  /* Outcomes / equity */
+  .equity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .eq-block { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .eq-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .eq-label [data-lucide] { width: 11px; height: 11px; }
+  .eq-benefits { border-color: #86efac; background: #f0fdf4; }
+  .eq-benefits .eq-label { color: #166534; }
+  .eq-benefits .eq-label [data-lucide] { color: #16a34a; }
+  .eq-costs { border-color: #fda4af; background: #fff1f2; }
+  .eq-costs .eq-label { color: #9f1239; }
+  .eq-costs .eq-label [data-lucide] { color: #dc2626; }
+  .eq-item { display: flex; align-items: flex-start; gap: 6px; font-size: 11.5px; color: var(--text-primary); margin-bottom: 5px; line-height: 1.4; }
+  .eq-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .dot-green { background: #16a34a; }
+  .dot-red   { background: #dc2626; }
+
+  /* Distributional heatmap */
+  .distrib-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .distrib-table th { text-align: left; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 9px; letter-spacing: 0.04em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .distrib-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+  .distrib-table tr:last-child td { border-bottom: none; }
+  .distrib-table .group-name { font-weight: 500; color: var(--text-primary); }
+  .impact-chip { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; display: inline-block; }
+  .ic-positive { background: #dcfce7; color: #166534; }
+  .ic-negative { background: #fee2e2; color: #9f1239; }
+  .ic-neutral  { background: #f1f5f9; color: #475569; }
+  .ic-mixed    { background: #fef3c7; color: #92400e; }
+
+  /* Early warning indicators */
+  .ew-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 7px; }
+  .ew-icon { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ew-icon [data-lucide] { width: 13px; height: 13px; }
+  .ew-metric { background: #dbeafe; }
+  .ew-metric [data-lucide] { color: #2563eb; }
+  .ew-event  { background: #fef3c7; }
+  .ew-event  [data-lucide] { color: #d97706; }
+  .ew-body { flex: 1; }
+  .ew-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .ew-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .ew-threshold { font-size: 10px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .ew-threshold [data-lucide] { color: var(--text-muted); width: 10px; height: 10px; }
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel { width: 270px; flex-shrink: 0; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .panel-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px; }
+
+  /* AI Stress Test */
+  .stress-test-intro { font-size: 11px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 10px; }
+  .stress-q { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; margin-bottom: 7px; font-size: 11.5px; color: var(--text-primary); line-height: 1.5; }
+  .stress-q-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+  .stress-q-label [data-lucide] { color: var(--text-muted); width: 10px; height: 10px; }
+  .stress-q.critical-q { border-color: #fca5a5; background: #fff8f8; }
+  .stress-q.critical-q .stress-q-label { color: #9f1239; }
+  .stress-q.critical-q .stress-q-label [data-lucide] { color: #dc2626; }
+
+  .btn-stress { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid #c4b5fd; background: #f5f3ff; color: #5b21b6; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .btn-stress:hover { background: #ede9fe; }
+  .btn-stress [data-lucide] { color: #7c3aed; }
+
+  .compare-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row:hover { color: #2563eb; }
+  .cr-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .cr-name { flex: 1; color: var(--text-secondary); }
+  .compare-row:hover .cr-name { color: #2563eb; }
+
+  .ai-box { border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 11px; line-height: 1.55; }
+  .ai-box-green { background: var(--ai-bg); border: 1px solid var(--ai-border); color: #166534; }
+  .ai-box-amber { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+  .ai-box strong { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-bottom: 3px; }
+  .ai-box-green [data-lucide] { color: #16a34a; }
+  .ai-box-amber [data-lucide] { color: #d97706; }
+
+  [data-lucide] { width: 13px; height: 13px; display: inline-flex; vertical-align: middle; flex-shrink: 0; stroke-width: 2; color: currentColor; }
+  .panel-header [data-lucide]  { width: 15px; height: 15px; }
+  .section-header [data-lucide]{ width: 13px; height: 13px; }
+  .ai-box [data-lucide]        { width: 12px; height: 12px; }
+  .ew-threshold [data-lucide]  { width: 10px; height: 10px; }
+  .assump-status [data-lucide] { width: 10px; height: 10px; }
+  .vt-btn [data-lucide]        { width: 12px; height: 12px; }
+  .add-scenario-btn [data-lucide] { width: 13px; height: 13px; }
+  .scenario-meta [data-lucide] { width: 11px; height: 11px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span class="current">Scenarios</span>
+  </div>
+  <div class="top-bar-right">
+    <div class="view-toggle">
+      <button class="vt-btn active"><i data-lucide="layout-list"></i> Detail</button>
+      <button class="vt-btn"><i data-lucide="columns-3"></i> Compare</button>
+    </div>
+    <button class="btn"><i data-lucide="link"></i> Link to proposal</button>
+    <button class="btn btn-primary"><i data-lucide="plus"></i> New Scenario</button>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">3 scenarios</div>
+
+    <div class="scenario-card selected">
+      <div class="sc-header">
+        <div class="sc-swatch" style="background:#2563eb;"></div>
+        <span class="sc-name">Housing-First Scale-Up</span>
+        <span class="sc-status scs-published">Published</span>
+      </div>
+      <div class="sc-desc">72-hr outreach window with systematic housing placement and DPH capacity expansion.</div>
+      <div class="sc-meta">
+        <span><i data-lucide="help-circle"></i> 5 assumptions</span>
+        <span><i data-lucide="activity"></i> 4 indicators</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-header">
+        <div class="sc-swatch" style="background:#d97706;"></div>
+        <span class="sc-name">Enforcement-Led</span>
+        <span class="sc-status scs-draft">Draft</span>
+      </div>
+      <div class="sc-desc">Enforcement-first with voluntary referrals; housing investment follows over 3–5 years.</div>
+      <div class="sc-meta">
+        <span><i data-lucide="help-circle"></i> 4 assumptions</span>
+        <span><i data-lucide="activity"></i> 3 indicators</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-header">
+        <div class="sc-swatch" style="background:#a8a29e;"></div>
+        <span class="sc-name">Status Quo Drift</span>
+        <span class="sc-status scs-draft">Draft</span>
+      </div>
+      <div class="sc-desc">No systematic policy change; encampment population grows with ad-hoc responses.</div>
+      <div class="sc-meta">
+        <span><i data-lucide="help-circle"></i> 3 assumptions</span>
+      </div>
+    </div>
+
+    <div class="add-scenario-btn"><i data-lucide="plus-circle"></i> Add scenario</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <div class="scenario-title-row">
+      <div>
+        <div class="scenario-title">
+          <span class="scenario-badge" style="background:#2563eb;"></span>
+          Housing-First Scale-Up
+        </div>
+        <div class="scenario-meta">
+          <span><i data-lucide="user"></i> Drafted by D. Okonkwo</span>
+          <span><i data-lucide="calendar"></i> Jun 2, 2026</span>
+          <span><i data-lucide="layers"></i> Linked to: Housing-first proposal</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn"><i data-lucide="pencil"></i> Edit</button>
+        <button class="btn" style="color:#7c3aed; border-color:#c4b5fd; background:#f5f3ff;"><i data-lucide="sparkles"></i> Stress test</button>
+      </div>
+    </div>
+
+    <!-- Narrative -->
+    <div class="section">
+      <div class="section-header"><i data-lucide="align-left"></i> Scenario Narrative</div>
+      <div class="section-body">
+        <div class="narrative">
+          <p>In this scenario, the city successfully implements the housing-first encampment response protocol. The 72-hour outreach window becomes standard practice, and DPH secures emergency funding to expand outreach capacity by 40% within six months. SFPD enforcement actions are systematically conditioned on DPH sign-off, and placement rates climb from the current 31% to above 60% within 12 months.</p>
+          <p>The reinforcing loop between clearings and displacement is broken: individuals who receive confirmed housing placements no longer cycle back to street encampments, reducing the encampment population by an estimated 20–30% over 18 months. Health system costs plateau and begin to decline by year 2 as preventive placements replace emergency interventions.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assumptions -->
+    <div class="section">
+      <div class="section-header"><i data-lucide="help-circle"></i> Underlying Assumptions</div>
+      <div class="section-body">
+        <div class="assumption-grid">
+          <div class="assump-item critical">
+            <div class="assump-num" style="background:#fee2e2; color:#9f1239;">1</div>
+            <div class="assump-body">
+              <div class="assump-text">DPH can secure funding to expand outreach team capacity by 40% within 6 months of policy adoption.</div>
+              <div class="assump-status as-critical"><i data-lucide="alert-circle"></i> Untested — no budget commitment confirmed</div>
+            </div>
+            <span class="assump-risk ar-high">Critical</span>
+          </div>
+          <div class="assump-item critical">
+            <div class="assump-num" style="background:#fee2e2; color:#9f1239;">2</div>
+            <div class="assump-body">
+              <div class="assump-text">The SFPD 68% offer rate translates to ≥60% confirmed housing placements once "offer" is operationally redefined to require a confirmed bed.</div>
+              <div class="assump-status as-critical"><i data-lucide="alert-circle"></i> Contested — definitional dispute unresolved</div>
+            </div>
+            <span class="assump-risk ar-high">Critical</span>
+          </div>
+          <div class="assump-item uncertain">
+            <div class="assump-num" style="background:#f5f3ff; color:#5b21b6;">3</div>
+            <div class="assump-body">
+              <div class="assump-text">Existing shelter and transitional housing inventory can absorb a 20–30% increase in placements without a new supply expansion.</div>
+              <div class="assump-status as-untested"><i data-lucide="circle-dashed"></i> Untested — requires DPH capacity audit</div>
+            </div>
+            <span class="assump-risk ar-med">Medium</span>
+          </div>
+          <div class="assump-item">
+            <div class="assump-num">4</div>
+            <div class="assump-body">
+              <div class="assump-text">72 hours is sufficient for DPH to complete outreach assessment and confirm placement availability.</div>
+              <div class="assump-status as-tested"><i data-lucide="check-circle"></i> Tested — confirmed by outreach team leads</div>
+            </div>
+            <span class="assump-risk ar-low">Low risk</span>
+          </div>
+          <div class="assump-item">
+            <div class="assump-num">5</div>
+            <div class="assump-body">
+              <div class="assump-text">SFPD operational cooperation with DPH sign-off requirement is achievable without legislative change.</div>
+              <div class="assump-status as-untested"><i data-lucide="circle-dashed"></i> Untested — requires City Attorney review</div>
+            </div>
+            <span class="assump-risk ar-med">Medium</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Equity & distributional implications -->
+    <div class="section">
+      <div class="section-header"><i data-lucide="scale"></i> Equity & Distributional Implications</div>
+      <div class="section-body">
+        <div class="equity-grid" style="margin-bottom:14px;">
+          <div class="eq-block eq-benefits">
+            <div class="eq-label"><i data-lucide="trending-up"></i> Who benefits</div>
+            <div class="eq-item"><div class="eq-dot dot-green"></div> Unhoused individuals receive confirmed placements before displacement — reduced trauma and continuity of care.</div>
+            <div class="eq-item"><div class="eq-dot dot-green"></div> Public Health system: reduced ER admissions and 30-day readmissions over 18-month horizon.</div>
+            <div class="eq-item"><div class="eq-dot dot-green"></div> Downtown businesses: gradual reduction in visible encampments tied to housing capacity, not arbitrary enforcement.</div>
+          </div>
+          <div class="eq-block eq-costs">
+            <div class="eq-label"><i data-lucide="trending-down"></i> Who bears costs / risks</div>
+            <div class="eq-item"><div class="eq-dot dot-red"></div> DPH absorbs significant operational and staffing burden — capacity expansion requires funding not yet secured.</div>
+            <div class="eq-item"><div class="eq-dot dot-red"></div> Downtown businesses face a longer timeline to visible change compared to enforcement-first scenarios.</div>
+            <div class="eq-item"><div class="eq-dot dot-red"></div> City budget: short-term cost increase before health system savings materialise (12–18 month lag).</div>
+          </div>
+        </div>
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:8px;">Impact by Stakeholder Group</div>
+        <table class="distrib-table">
+          <tr><th>Group</th><th>Short-term (0–6 mo)</th><th>Medium-term (6–18 mo)</th><th>Long-term (18 mo+)</th></tr>
+          <tr><td class="group-name">Unhoused Residents</td><td><span class="impact-chip ic-neutral">Neutral</span></td><td><span class="impact-chip ic-positive">Positive</span></td><td><span class="impact-chip ic-positive">Positive</span></td></tr>
+          <tr><td class="group-name">Downtown BID</td><td><span class="impact-chip ic-negative">Negative</span></td><td><span class="impact-chip ic-mixed">Mixed</span></td><td><span class="impact-chip ic-positive">Positive</span></td></tr>
+          <tr><td class="group-name">Public Health (DPH)</td><td><span class="impact-chip ic-negative">High burden</span></td><td><span class="impact-chip ic-mixed">Mixed</span></td><td><span class="impact-chip ic-positive">Positive</span></td></tr>
+          <tr><td class="group-name">Police Dept (SFPD)</td><td><span class="impact-chip ic-mixed">Constrained</span></td><td><span class="impact-chip ic-neutral">Neutral</span></td><td><span class="impact-chip ic-neutral">Neutral</span></td></tr>
+          <tr><td class="group-name">Housing Nonprofits</td><td><span class="impact-chip ic-positive">Positive</span></td><td><span class="impact-chip ic-positive">Positive</span></td><td><span class="impact-chip ic-positive">Positive</span></td></tr>
+          <tr><td class="group-name">City Budget</td><td><span class="impact-chip ic-negative">Cost increase</span></td><td><span class="impact-chip ic-mixed">Break-even</span></td><td><span class="impact-chip ic-positive">Net savings</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Early warning indicators -->
+    <div class="section">
+      <div class="section-header"><i data-lucide="radio"></i> Early Warning Indicators</div>
+      <div class="section-body">
+        <div class="ew-item">
+          <div class="ew-icon ew-metric"><i data-lucide="percent"></i></div>
+          <div class="ew-body">
+            <div class="ew-name">% clearings with confirmed placement within 30 days</div>
+            <div class="ew-desc">Primary signal that the housing-first mechanism is functioning. Should rise above 50% within 6 months.</div>
+            <div class="ew-threshold"><i data-lucide="alert-triangle"></i> Alert if &lt;40% after month 4</div>
+          </div>
+        </div>
+        <div class="ew-item">
+          <div class="ew-icon ew-metric"><i data-lucide="bar-chart-2"></i></div>
+          <div class="ew-body">
+            <div class="ew-name">DPH outreach team capacity utilisation</div>
+            <div class="ew-desc">If utilisation exceeds 90% before capacity expansion, the 72-hr window will create operational bottlenecks.</div>
+            <div class="ew-threshold"><i data-lucide="alert-triangle"></i> Alert if &gt;85% for 2 consecutive months</div>
+          </div>
+        </div>
+        <div class="ew-item">
+          <div class="ew-icon ew-event"><i data-lucide="calendar-x"></i></div>
+          <div class="ew-body">
+            <div class="ew-name">SFPD enforcement actions proceeding without DPH sign-off</div>
+            <div class="ew-desc">Operational compliance signal. Any instance where enforcement bypasses the outreach window.</div>
+            <div class="ew-threshold"><i data-lucide="alert-triangle"></i> Alert on any occurrence</div>
+          </div>
+        </div>
+        <div class="ew-item">
+          <div class="ew-icon ew-metric"><i data-lucide="activity"></i></div>
+          <div class="ew-body">
+            <div class="ew-name">ER visits by individuals post-clearing (90-day window)</div>
+            <div class="ew-desc">Leading indicator of downstream health cost trajectory. Should decline as placement rates rise.</div>
+            <div class="ew-threshold"><i data-lucide="alert-triangle"></i> Alert if no decline by month 9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px;"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-header">
+      <i data-lucide="sparkles" style="color:#7c3aed;"></i>
+      <span class="panel-header-title">AI Stress Test</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="stress-test-intro">AI has generated adversarial questions against this scenario's assumptions. These questions surface the conditions under which the scenario would fail.</div>
+      <button class="btn-stress"><i data-lucide="refresh-cw"></i> Re-run stress test</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Critical failure modes</div>
+
+      <div class="stress-q critical-q">
+        <div class="stress-q-label"><i data-lucide="alert-triangle"></i> Critical</div>
+        If DPH cannot secure the 40% capacity expansion budget in year 1, what happens to clearings that cannot be preceded by an outreach window? Does enforcement stop, or does the policy unravel?
+      </div>
+      <div class="stress-q critical-q">
+        <div class="stress-q-label"><i data-lucide="alert-triangle"></i> Critical</div>
+        If the definitional dispute between SFPD "offers" and actual placements is not resolved, this scenario may report high compliance while actual placement rates remain low. What is the accountability mechanism?
+      </div>
+      <div class="stress-q">
+        <div class="stress-q-label"><i data-lucide="circle-dashed"></i> Moderate</div>
+        This scenario assumes shelter inventory can absorb more placements without a supply expansion. What is the specific capacity headroom, and who owns the risk if inventory is exhausted mid-implementation?
+      </div>
+      <div class="stress-q">
+        <div class="stress-q-label"><i data-lucide="circle-dashed"></i> Moderate</div>
+        The scenario projects a 20–30% encampment population reduction in 18 months. What is the counterfactual inflow rate — how many new individuals are expected to enter street homelessness in that period?
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Compare with</div>
+      <div class="compare-row"><div class="cr-swatch" style="background:#d97706;"></div><span class="cr-name">Enforcement-Led</span><i data-lucide="arrow-right" style="color:var(--text-muted);"></i></div>
+      <div class="compare-row"><div class="cr-swatch" style="background:#a8a29e;"></div><span class="cr-name">Status Quo Drift</span><i data-lucide="arrow-right" style="color:var(--text-muted);"></i></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">AI Assessment</div>
+      <div class="ai-box ai-box-amber">
+        <strong><i data-lucide="alert-triangle"></i> 2 critical assumptions untested</strong>
+        This scenario cannot be responsibly advanced to a decision without resolving assumptions 1 and 2 — both concern the operational viability of the core mechanism.
+      </div>
+      <div class="ai-box ai-box-green">
+        <strong><i data-lucide="sparkles"></i> Strongest evidence base</strong>
+        Of the three scenarios, this one has the most direct evidentiary support from the deliberation record and accepted claims. The causal pathway is documented and testable.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

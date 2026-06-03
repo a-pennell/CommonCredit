@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring — Lo-Fi Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f4; --surface: #ffffff; --border: #d4d4d4;
+    --border-strong: #a3a3a3; --text-primary: #1c1917;
+    --text-secondary: #78716c; --text-muted: #a8a29e;
+    --accent: #292524; --accent-light: #e7e5e4;
+    --warn-bg: #fef9c3; --warn-border: #eab308; --warn-text: #713f12;
+    --ai-bg: #f0fdf4; --ai-border: #86efac; --header-h: 56px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 13px; line-height: 1.5; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  .top-bar { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+  .org-logo { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 12px; }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+  .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 12px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .status-pill { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sp-monitoring { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ─── LEFT PANEL ──────────────────────────────── */
+  .left-panel { width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding: 14px 12px; gap: 16px; }
+  .lp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px; }
+
+  .decision-link-card { border: 1px solid var(--border); border-radius: 7px; padding: 10px 11px; cursor: pointer; }
+  .decision-link-card:hover { background: var(--bg); }
+  .dlc-type { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+  .dlc-type [data-lucide] { color: #16a34a; }
+  .dlc-title { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.35; margin-bottom: 4px; }
+  .dlc-meta  { font-size: 10px; color: var(--text-muted); }
+
+  .review-schedule-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 7px; padding: 10px 11px; }
+  .rsc-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #166534; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .rsc-label [data-lucide] { color: #16a34a; }
+  .review-item { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-bottom: 1px solid #bbf7d0; }
+  .review-item:last-child { border-bottom: none; }
+  .ri-date { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .ri-desc { font-size: 10px; color: #166534; }
+
+  .alert-trigger-card { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 7px; padding: 10px 11px; }
+  .atc-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #92400e; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .atc-label [data-lucide] { color: #d97706; }
+  .trigger-item { font-size: 11px; color: var(--warn-text); padding: 4px 0; border-bottom: 1px solid #fcd34d; display: flex; align-items: flex-start; gap: 5px; line-height: 1.4; }
+  .trigger-item:last-child { border-bottom: none; }
+  .trigger-item [data-lucide] { color: #d97706; flex-shrink: 0; margin-top: 1px; }
+
+  /* ─── MAIN ────────────────────────────────────── */
+  .main { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .main-header { margin-bottom: 4px; }
+  .main-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .main-sub { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
+  .main-sub [data-lucide] { color: var(--text-muted); }
+
+  /* Active alert banner */
+  .active-alert-banner { background: #fff1f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .aab-icon { width: 32px; height: 32px; border-radius: 7px; background: #fee2e2; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .aab-icon [data-lucide] { color: #dc2626; width: 16px; height: 16px; }
+  .aab-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 3px; }
+  .aab-desc  { font-size: 12px; color: #7f1d1d; line-height: 1.5; }
+  .aab-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .aab-btn { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid; }
+  .aab-btn-primary { background: #dc2626; color: white; border-color: #dc2626; }
+  .aab-btn-sec { background: white; color: #9f1239; border-color: #fca5a5; }
+
+  /* Indicator cards */
+  .indicators-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+
+  .indicator-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .indicator-card.status-alert    { border-left: 3px solid #dc2626; }
+  .indicator-card.status-at-risk  { border-left: 3px solid #d97706; }
+  .indicator-card.status-on-track { border-left: 3px solid #16a34a; }
+  .indicator-card.status-no-data  { border-left: 3px solid #d1d5db; }
+
+  .ic-header { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px 8px; }
+  .ic-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ic-icon [data-lucide] { width: 14px; height: 14px; }
+  .ic-alert    { background: #fee2e2; }
+  .ic-alert    [data-lucide] { color: #dc2626; }
+  .ic-at-risk  { background: #fef3c7; }
+  .ic-at-risk  [data-lucide] { color: #d97706; }
+  .ic-on-track { background: #dcfce7; }
+  .ic-on-track [data-lucide] { color: #16a34a; }
+  .ic-no-data  { background: var(--accent-light); }
+  .ic-no-data  [data-lucide] { color: var(--text-muted); }
+
+  .ic-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.35; flex: 1; }
+  .ic-status-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+  .isb-alert    { background: #fee2e2; color: #9f1239; }
+  .isb-at-risk  { background: #fef3c7; color: #92400e; }
+  .isb-on-track { background: #dcfce7; color: #166534; }
+  .isb-no-data  { background: var(--accent-light); color: var(--text-muted); }
+
+  .ic-values { display: flex; align-items: center; gap: 6px; padding: 0 14px 8px; }
+  .iv-block { flex: 1; }
+  .iv-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .iv-value { font-size: 18px; font-weight: 800; }
+  .iv-sub   { font-size: 10px; color: var(--text-secondary); }
+  .iv-value.good   { color: #16a34a; }
+  .iv-value.warn   { color: #d97706; }
+  .iv-value.alert  { color: #dc2626; }
+  .iv-value.muted  { color: var(--text-muted); }
+  .iv-sep { width: 1px; height: 40px; background: var(--border); flex-shrink: 0; }
+
+  /* Sparkline */
+  .ic-chart { padding: 0 14px 10px; }
+  .sparkline-wrap { position: relative; height: 48px; }
+  .sparkline-svg { width: 100%; height: 100%; }
+  .spark-target-line { stroke: #16a34a; stroke-width: 1; stroke-dasharray: 4,3; }
+  .spark-baseline { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 2,3; }
+  .spark-line-good  { fill: none; stroke: #16a34a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .spark-line-warn  { fill: none; stroke: #d97706; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .spark-line-alert { fill: none; stroke: #dc2626; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .spark-area-good  { fill: #dcfce7; opacity: 0.5; }
+  .spark-area-warn  { fill: #fef3c7; opacity: 0.5; }
+  .spark-area-alert { fill: #fee2e2; opacity: 0.5; }
+  .spark-dot { r: 3; }
+
+  .ic-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #fafaf9; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-muted); }
+  .ic-footer [data-lucide] { color: var(--text-muted); }
+  .ic-update-btn { font-size: 11px; color: #2563eb; cursor: pointer; display: flex; align-items: center; gap: 3px; font-weight: 500; }
+  .ic-update-btn [data-lucide] { color: #2563eb; }
+
+  .ic-alert-note { margin: 0 14px 10px; background: #fff1f2; border: 1px solid #fca5a5; border-radius: 5px; padding: 7px 10px; font-size: 11px; color: #7f1d1d; line-height: 1.5; }
+  .ic-alert-note strong { color: #9f1239; }
+
+  /* Assumption audit section */
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .section-header { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+  .section-header [data-lucide] { color: var(--text-muted); }
+  .section-body { padding: 14px 16px; }
+
+  .assumption-audit-item { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .assumption-audit-item:last-child { border-bottom: none; }
+  .audit-status-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .aai-holding  { background: #dcfce7; }
+  .aai-holding  [data-lucide] { color: #16a34a; width: 13px; height: 13px; }
+  .aai-violated { background: #fee2e2; }
+  .aai-violated [data-lucide] { color: #dc2626; width: 13px; height: 13px; }
+  .aai-unknown  { background: var(--accent-light); }
+  .aai-unknown  [data-lucide] { color: var(--text-muted); width: 13px; height: 13px; }
+  .audit-body { flex: 1; }
+  .audit-text { font-size: 12px; color: var(--text-primary); line-height: 1.45; margin-bottom: 3px; }
+  .audit-verdict { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .audit-verdict [data-lucide] { width: 11px; height: 11px; }
+  .av-holding  { color: #16a34a; }
+  .av-violated { color: #dc2626; }
+  .av-unknown  { color: var(--text-muted); }
+  .audit-source { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── RIGHT PANEL ─────────────────────────────── */
+  .right-panel { width: 260px; flex-shrink: 0; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .panel-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .panel-header-title { font-size: 13px; font-weight: 700; }
+  .panel-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px; }
+
+  .overall-health { text-align: center; padding: 8px 0 12px; }
+  .oh-score { font-size: 36px; font-weight: 900; }
+  .oh-score.score-ok    { color: #d97706; }
+  .oh-score.score-good  { color: #16a34a; }
+  .oh-score.score-alert { color: #dc2626; }
+  .oh-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .oh-sub   { font-size: 10px; color: var(--text-muted); }
+  .health-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 11px; }
+  .hr-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  .ai-box { border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 11px; line-height: 1.55; }
+  .ai-box-green { background: var(--ai-bg); border: 1px solid var(--ai-border); color: #166534; }
+  .ai-box-amber { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+  .ai-box-red   { background: #fff1f2; border: 1px solid #fda4af; color: #9f1239; }
+  .ai-box strong { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-bottom: 3px; }
+  .ai-box-green [data-lucide] { color: #16a34a; }
+  .ai-box-amber [data-lucide] { color: #d97706; }
+  .ai-box-red   [data-lucide] { color: #dc2626; }
+
+  .timeline-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .timeline-item:last-child { border-bottom: none; }
+  .tl-dot-col { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tl-dot.past { background: var(--border-strong); }
+  .tl-dot.now  { background: #2563eb; }
+  .tl-dot.future { background: var(--border); border: 1px solid var(--border-strong); }
+  .tl-body { flex: 1; }
+  .tl-date { font-size: 10px; color: var(--text-muted); }
+  .tl-event { font-size: 11px; color: var(--text-primary); line-height: 1.4; }
+  .tl-event.future { color: var(--text-muted); }
+
+  [data-lucide] { width: 13px; height: 13px; display: inline-flex; vertical-align: middle; flex-shrink: 0; stroke-width: 2; color: currentColor; }
+  .panel-header [data-lucide]  { width: 15px; height: 15px; }
+  .section-header [data-lucide]{ width: 13px; height: 13px; }
+  .ai-box [data-lucide]        { width: 12px; height: 12px; }
+  .aab-icon [data-lucide]      { width: 16px; height: 16px; }
+  .ic-update-btn [data-lucide] { width: 11px; height: 11px; }
+  .ic-footer [data-lucide]     { width: 10px; height: 10px; }
+  .dlc-type [data-lucide]      { width: 11px; height: 11px; }
+  .rsc-label [data-lucide]     { width: 11px; height: 11px; }
+  .atc-label [data-lucide]     { width: 11px; height: 11px; }
+  .trigger-item [data-lucide]  { width: 11px; height: 11px; }
+  .audit-verdict [data-lucide] { width: 11px; height: 11px; }
+  .aai-holding [data-lucide]   { width: 13px; height: 13px; }
+  .aai-violated [data-lucide]  { width: 13px; height: 13px; }
+  .aai-unknown [data-lucide]   { width: 13px; height: 13px; }
+  .main-sub [data-lucide]      { width: 11px; height: 11px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="org-logo">SF</div>
+  <div class="breadcrumb">
+    <span>Downtown Homelessness Response</span>
+    <span class="sep">/</span>
+    <span class="current">Monitoring</span>
+  </div>
+  <div class="top-bar-right">
+    <span class="status-pill sp-monitoring">Monitoring</span>
+    <button class="btn"><i data-lucide="plus"></i> Add Indicator</button>
+    <button class="btn"><i data-lucide="file-text"></i> Review Report</button>
+    <button class="btn btn-primary"><i data-lucide="calendar-check"></i> Schedule Review</button>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div>
+      <div class="lp-label">Decision</div>
+      <div class="decision-link-card">
+        <div class="dlc-type"><i data-lucide="check-square"></i> Finalized Decision</div>
+        <div class="dlc-title">Encampment Response Policy — Downtown Core</div>
+        <div class="dlc-meta">Finalized Jun 14, 2026 · D. Okonkwo</div>
+      </div>
+    </div>
+    <div>
+      <div class="lp-label">Review Schedule</div>
+      <div class="review-schedule-card">
+        <div class="rsc-label"><i data-lucide="calendar"></i> Upcoming Reviews</div>
+        <div class="review-item">
+          <div class="ri-date">Sep 14, 2026</div>
+          <div class="ri-desc">90-day check · 3 months away</div>
+        </div>
+        <div class="review-item">
+          <div class="ri-date">Dec 14, 2026</div>
+          <div class="ri-desc">180-day full review</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="lp-label">Alert Triggers</div>
+      <div class="alert-trigger-card">
+        <div class="atc-label"><i data-lucide="bell"></i> Auto-alerts if:</div>
+        <div class="trigger-item"><i data-lucide="zap"></i> Placement rate &lt;40% for 2 months</div>
+        <div class="trigger-item"><i data-lucide="zap"></i> DPH capacity &gt;85% sustained</div>
+        <div class="trigger-item"><i data-lucide="zap"></i> Any enforcement without DPH sign-off</div>
+        <div class="trigger-item"><i data-lucide="zap"></i> ER visits not declining by month 9</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <div class="main-header">
+      <div class="main-title">Monitoring Dashboard</div>
+      <div class="main-sub">
+        <span><i data-lucide="calendar"></i> Decision finalized Jun 14, 2026</span>
+        <span><i data-lucide="clock"></i> Day 52 of monitoring</span>
+        <span><i data-lucide="activity"></i> 5 indicators · last updated Aug 3, 2026</span>
+      </div>
+    </div>
+
+    <!-- Active alert banner -->
+    <div class="active-alert-banner">
+      <div class="aab-icon"><i data-lucide="triangle-alert"></i></div>
+      <div>
+        <div class="aab-title">Alert: Housing placement rate below target threshold</div>
+        <div class="aab-desc">The % of clearings with confirmed housing placement within 30 days has remained below 40% for 2 consecutive months (Jul: 34%, Aug: 37%). This triggered an automatic alert. The 90-day review has been moved forward. Decision Steward has been notified.</div>
+        <div class="aab-actions">
+          <button class="aab-btn aab-btn-primary"><i data-lucide="calendar-check"></i> Schedule early review</button>
+          <button class="aab-btn aab-btn-sec"><i data-lucide="file-edit"></i> Add explanation</button>
+          <button class="aab-btn aab-btn-sec"><i data-lucide="message-square-quote"></i> Open deliberation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicator cards -->
+    <div class="indicators-grid">
+
+      <!-- 1. Placement rate — ALERT -->
+      <div class="indicator-card status-alert">
+        <div class="ic-header">
+          <div class="ic-icon ic-alert"><i data-lucide="triangle-alert"></i></div>
+          <div class="ic-title">% clearings with confirmed housing placement within 30 days</div>
+          <span class="ic-status-badge isb-alert">Alert</span>
+        </div>
+        <div class="ic-alert-note"><strong>Below threshold.</strong> Two consecutive months under 40%. Auto-review triggered. Possible cause: shelter capacity shortfall flagged by DPH outreach team in July.</div>
+        <div class="ic-values">
+          <div class="iv-block">
+            <div class="iv-label">Current (Aug)</div>
+            <div class="iv-value alert">37%</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Target (Month 6)</div>
+            <div class="iv-value" style="color:var(--text-secondary);">50%</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Baseline (pre)</div>
+            <div class="iv-value muted">31%</div>
+          </div>
+        </div>
+        <div class="ic-chart">
+          <svg class="sparkline-svg" viewBox="0 0 280 48" preserveAspectRatio="none">
+            <path class="spark-area-alert" d="M0,42 L40,40 L80,38 L120,36 L160,38 L200,40 L240,36 L280,36 L280,48 L0,48 Z"/>
+            <line x1="0" y1="20" x2="280" y2="20" class="spark-target-line"/>
+            <line x1="0" y1="38" x2="280" y2="38" class="spark-baseline" stroke-dasharray="2,4"/>
+            <polyline class="spark-line-alert" points="0,42 40,40 80,38 120,36 160,38 200,40 240,36 280,36"/>
+            <circle cx="280" cy="36" r="3" fill="#dc2626"/>
+            <text x="4" y="17" font-size="8" fill="#16a34a">Target 50%</text>
+            <text x="4" y="46" font-size="8" fill="#a8a29e">Baseline 31%</text>
+            <text x="238" y="30" font-size="9" font-weight="700" fill="#dc2626">37%</text>
+          </svg>
+        </div>
+        <div class="ic-footer">
+          <span><i data-lucide="calendar"></i> Updated Aug 3, 2026</span>
+          <span class="ic-update-btn"><i data-lucide="plus-circle"></i> Add data point</span>
+        </div>
+      </div>
+
+      <!-- 2. ER visits — AT RISK -->
+      <div class="indicator-card status-at-risk">
+        <div class="ic-header">
+          <div class="ic-icon ic-at-risk"><i data-lucide="activity"></i></div>
+          <div class="ic-title">ER visits by individuals post-clearing (90-day window)</div>
+          <span class="ic-status-badge isb-at-risk">At risk</span>
+        </div>
+        <div class="ic-values">
+          <div class="iv-block">
+            <div class="iv-label">Current rate</div>
+            <div class="iv-value warn">2.1 / person</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Target trend</div>
+            <div class="iv-value" style="color:var(--text-secondary);">Declining</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Baseline</div>
+            <div class="iv-value muted">2.4 / person</div>
+          </div>
+        </div>
+        <div class="ic-chart">
+          <svg class="sparkline-svg" viewBox="0 0 280 48" preserveAspectRatio="none">
+            <path class="spark-area-warn" d="M0,10 L60,12 L120,16 L180,18 L220,16 L280,18 L280,48 L0,48 Z"/>
+            <line x1="0" y1="30" x2="280" y2="30" class="spark-target-line"/>
+            <polyline class="spark-line-warn" points="0,10 60,12 120,16 180,18 220,16 280,18"/>
+            <circle cx="280" cy="18" r="3" fill="#d97706"/>
+            <text x="4" y="28" font-size="8" fill="#16a34a">Target: declining</text>
+            <text x="226" y="14" font-size="9" font-weight="700" fill="#d97706">2.1</text>
+          </svg>
+        </div>
+        <div class="ic-footer">
+          <span><i data-lucide="calendar"></i> Updated Aug 3, 2026</span>
+          <span class="ic-update-btn"><i data-lucide="plus-circle"></i> Add data point</span>
+        </div>
+      </div>
+
+      <!-- 3. DPH capacity — AT RISK -->
+      <div class="indicator-card status-at-risk">
+        <div class="ic-header">
+          <div class="ic-icon ic-at-risk"><i data-lucide="users"></i></div>
+          <div class="ic-title">DPH outreach team capacity utilisation</div>
+          <span class="ic-status-badge isb-at-risk">At risk</span>
+        </div>
+        <div class="ic-values">
+          <div class="iv-block">
+            <div class="iv-label">Current</div>
+            <div class="iv-value warn">82%</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Alert threshold</div>
+            <div class="iv-value" style="color:var(--text-secondary);">&gt;85%</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Trend</div>
+            <div class="iv-value warn">↑ Rising</div>
+          </div>
+        </div>
+        <div class="ic-chart">
+          <svg class="sparkline-svg" viewBox="0 0 280 48" preserveAspectRatio="none">
+            <path class="spark-area-warn" d="M0,36 L60,32 L120,28 L180,24 L220,22 L280,20 L280,48 L0,48 Z"/>
+            <line x1="0" y1="14" x2="280" y2="14" class="spark-target-line" stroke="#dc2626"/>
+            <polyline class="spark-line-warn" points="0,36 60,32 120,28 180,24 220,22 280,20"/>
+            <circle cx="280" cy="20" r="3" fill="#d97706"/>
+            <text x="4" y="11" font-size="8" fill="#dc2626">Alert: 85%</text>
+            <text x="232" y="16" font-size="9" font-weight="700" fill="#d97706">82%</text>
+          </svg>
+        </div>
+        <div class="ic-footer">
+          <span><i data-lucide="calendar"></i> Updated Aug 1, 2026</span>
+          <span class="ic-update-btn"><i data-lucide="plus-circle"></i> Add data point</span>
+        </div>
+      </div>
+
+      <!-- 4. Average time to placement — ON TRACK -->
+      <div class="indicator-card status-on-track">
+        <div class="ic-header">
+          <div class="ic-icon ic-on-track"><i data-lucide="clock"></i></div>
+          <div class="ic-title">Average time from clearing notification to confirmed placement</div>
+          <span class="ic-status-badge isb-on-track">On track</span>
+        </div>
+        <div class="ic-values">
+          <div class="iv-block">
+            <div class="iv-label">Current avg</div>
+            <div class="iv-value good">58 hrs</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Policy limit</div>
+            <div class="iv-value" style="color:var(--text-secondary);">72 hrs</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Trend</div>
+            <div class="iv-value good">↓ Improving</div>
+          </div>
+        </div>
+        <div class="ic-chart">
+          <svg class="sparkline-svg" viewBox="0 0 280 48" preserveAspectRatio="none">
+            <path class="spark-area-good" d="M0,8 L60,12 L120,18 L180,24 L220,28 L280,30 L280,48 L0,48 Z"/>
+            <line x1="0" y1="6" x2="280" y2="6" class="spark-target-line" stroke="#d97706"/>
+            <polyline class="spark-line-good" points="0,8 60,12 120,18 180,24 220,28 280,30"/>
+            <circle cx="280" cy="30" r="3" fill="#16a34a"/>
+            <text x="4" y="4" font-size="8" fill="#d97706">72hr limit</text>
+            <text x="230" y="27" font-size="9" font-weight="700" fill="#16a34a">58hr</text>
+          </svg>
+        </div>
+        <div class="ic-footer">
+          <span><i data-lucide="calendar"></i> Updated Aug 3, 2026</span>
+          <span class="ic-update-btn"><i data-lucide="plus-circle"></i> Add data point</span>
+        </div>
+      </div>
+
+      <!-- 5. Recidivism — NO DATA YET -->
+      <div class="indicator-card status-no-data">
+        <div class="ic-header">
+          <div class="ic-icon ic-no-data"><i data-lucide="circle-dashed"></i></div>
+          <div class="ic-title">Return to cleared site within 60 days (recidivism rate)</div>
+          <span class="ic-status-badge isb-no-data">No data</span>
+        </div>
+        <div class="ic-values">
+          <div class="iv-block">
+            <div class="iv-label">Current</div>
+            <div class="iv-value muted">—</div>
+            <div class="iv-sub">Data collection begins Sep 2026</div>
+          </div>
+          <div class="iv-sep"></div>
+          <div class="iv-block">
+            <div class="iv-label">Baseline</div>
+            <div class="iv-value muted">~45%</div>
+            <div class="iv-sub">Pre-decision estimate</div>
+          </div>
+        </div>
+        <div style="padding: 6px 14px 12px; font-size:11px; color:var(--text-muted); line-height:1.5;">
+          First 60-day cohort will complete tracking in September. Linked to the causal claim about displacement recidivism.
+        </div>
+        <div class="ic-footer">
+          <span style="color:var(--text-muted);">Awaiting first data point</span>
+          <span class="ic-update-btn"><i data-lucide="plus-circle"></i> Add data point</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Assumption audit -->
+    <div class="section">
+      <div class="section-header"><i data-lucide="help-circle"></i> Assumption Audit — 52 Days Post-Decision</div>
+      <div class="section-body">
+        <div class="assumption-audit-item">
+          <div class="audit-status-icon aai-violated"><i data-lucide="x-circle"></i></div>
+          <div class="audit-body">
+            <div class="audit-text">DPH can secure funding to expand outreach team capacity by 40% within 6 months.</div>
+            <div class="audit-verdict av-violated"><i data-lucide="x-circle"></i> Assumption under stress — no budget commitment; capacity at 82% and rising without expansion</div>
+            <div class="audit-source">Evidence: DPH capacity utilisation indicator + Aug 1 DPH operations note</div>
+          </div>
+        </div>
+        <div class="assumption-audit-item">
+          <div class="audit-status-icon aai-unknown"><i data-lucide="circle-dashed"></i></div>
+          <div class="audit-body">
+            <div class="audit-text">SFPD 68% offer rate translates to ≥60% confirmed housing placements once operationally redefined.</div>
+            <div class="audit-verdict av-unknown"><i data-lucide="circle-dashed"></i> Still unresolved — SFPD and DPH using different data definitions in July reporting</div>
+            <div class="audit-source">Evidence: July placement rate discrepancy (SFPD: 52% offers vs DPH: 37% placements)</div>
+          </div>
+        </div>
+        <div class="assumption-audit-item">
+          <div class="audit-status-icon aai-holding"><i data-lucide="check-circle"></i></div>
+          <div class="audit-body">
+            <div class="audit-text">72 hours is sufficient for DPH to complete outreach assessment and confirm placement availability.</div>
+            <div class="audit-verdict av-holding"><i data-lucide="check-circle"></i> Holding — average time 58hrs, within window; no clearings missed 72hr target</div>
+            <div class="audit-source">Evidence: Time-to-placement indicator, Aug 3 data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px;"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-header">
+      <i data-lucide="activity" style="color:#d97706;"></i>
+      <span class="panel-header-title">Monitoring Summary</span>
+    </div>
+
+    <div class="panel-section">
+      <div class="overall-health">
+        <div class="oh-score score-ok">⚠</div>
+        <div class="oh-label">At Risk</div>
+        <div class="oh-sub">Day 52 of monitoring</div>
+      </div>
+      <div class="health-row"><div class="hr-dot" style="background:#dc2626;"></div><span style="flex:1; font-size:11px;">Placement rate — Alert</span></div>
+      <div class="health-row"><div class="hr-dot" style="background:#d97706;"></div><span style="flex:1; font-size:11px;">ER visits — At risk</span></div>
+      <div class="health-row"><div class="hr-dot" style="background:#d97706;"></div><span style="flex:1; font-size:11px;">DPH capacity — At risk</span></div>
+      <div class="health-row"><div class="hr-dot" style="background:#16a34a;"></div><span style="flex:1; font-size:11px;">Time to placement — On track</span></div>
+      <div class="health-row"><div class="hr-dot" style="background:#d1d5db;"></div><span style="flex:1; font-size:11px;">Recidivism — No data yet</span></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">AI Analysis</div>
+      <div class="ai-box ai-box-red">
+        <strong><i data-lucide="triangle-alert"></i> Decision at risk</strong>
+        The placement rate alert is linked directly to the untested capacity assumption. The decision mechanism is failing at its first operational constraint. Early review is warranted before the 90-day scheduled date.
+      </div>
+      <div class="ai-box ai-box-amber">
+        <strong><i data-lucide="alert-triangle"></i> Pattern match</strong>
+        The DPH capacity and placement rate indicators are moving together — a capacity bottleneck, not a policy design failure. The 40% capacity expansion assumption needs to be revisited urgently.
+      </div>
+      <div class="ai-box ai-box-green">
+        <strong><i data-lucide="sparkles"></i> Positive signal</strong>
+        The 72-hour window is operationally viable when capacity is available — average time is 58 hours. The mechanism works; the constraint is supply-side.
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Decision Timeline</div>
+      <div class="timeline-item">
+        <div class="tl-dot-col"><div class="tl-dot past"></div></div>
+        <div class="tl-body"><div class="tl-date">Jun 14, 2026</div><div class="tl-event">Decision finalized</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col"><div class="tl-dot past"></div></div>
+        <div class="tl-body"><div class="tl-date">Aug 5, 2026</div><div class="tl-event">🔴 Alert triggered: placement rate below threshold</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col"><div class="tl-dot now"></div></div>
+        <div class="tl-body"><div class="tl-date">Aug 7, 2026 — Today</div><div class="tl-event" style="font-weight:600;">Day 52 · Early review in discussion</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col"><div class="tl-dot future"></div></div>
+        <div class="tl-body"><div class="tl-date">Sep 14, 2026</div><div class="tl-event future">90-day review (may be moved forward)</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot-col"><div class="tl-dot future"></div></div>
+        <div class="tl-body"><div class="tl-date">Dec 14, 2026</div><div class="tl-event future">180-day full indicator assessment</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

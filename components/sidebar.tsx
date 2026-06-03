@@ -12,10 +12,13 @@ interface SidebarProps {
 const memberNav = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/marketplace", label: "Marketplace" },
+  { href: "/ai", label: "AI match ✦" },
   { href: "/members", label: "Members" },
   { href: "/pay", label: "Send credits" },
   { href: "/invoices", label: "Invoices" },
   { href: "/transactions", label: "Transactions" },
+  { href: "/proposals", label: "Proposals" },
+  { href: "/disputes", label: "Disputes" },
   { href: "/profile", label: "Profile" },
 ]
 
@@ -25,6 +28,7 @@ const adminNav = [
   { href: "/admin/members", label: "Members" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/credit-requests", label: "Credit requests" },
+  { href: "/admin/disputes", label: "Disputes" },
   { href: "/admin/transactions", label: "Transactions" },
 ]
 
