@@ -20,7 +20,8 @@ export default async function MemberLayout({
         userName={session.user.name}
         userEmail={session.user.email}
       />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      {/* pt-14 clears the fixed mobile top bar; md:pt-0 removes it on desktop */}
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">{children}</main>
     </div>
   )
 }

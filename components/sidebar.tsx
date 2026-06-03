@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
 import { signOutAction } from "@/lib/actions/auth"
 import type { Route } from "next"
 
@@ -12,7 +13,6 @@ interface SidebarProps {
   pendingCount?: number
 }
 
-// Member nav split into sections for scannability
 const memberSections = [
   {
     label: null,
@@ -69,7 +69,13 @@ const adminSections = [
 
 export function Sidebar({ role, userName, userEmail, pendingCount }: SidebarProps) {
   const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false)
   const sections = role === "admin" ? adminSections : memberSections
+
+  // Close drawer on route change
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
 
   function isActive(href: string) {
     if (href === "/dashboard" || href === "/admin/dashboard") {
@@ -78,20 +84,32 @@ export function Sidebar({ role, userName, userEmail, pendingCount }: SidebarProp
     return pathname.startsWith(href)
   }
 
-  return (
-    <aside className="flex h-full w-56 flex-col border-r border-gray-200 bg-white">
+  const navContent = (
+    <>
       {/* Logo */}
-      <div className="flex h-14 shrink-0 items-center border-b border-gray-200 px-4">
-        <Link href="/" className="flex items-center gap-2">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 px-4">
+        <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
           <span className="text-sm font-semibold tracking-tight text-gray-900">
             CommonCredit
           </span>
         </Link>
-        {role === "admin" && (
-          <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-            Admin
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {role === "admin" && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+              Admin
+            </span>
+          )}
+          {/* Close button — mobile only */}
+          <button
+            onClick={() => setIsOpen(false)}
+            className="md:hidden rounded-md p-1 text-gray-400 hover:bg-gray-100"
+            aria-label="Close menu"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Nav sections */}
@@ -153,6 +171,45 @@ export function Sidebar({ role, userName, userEmail, pendingCount }: SidebarProp
           </button>
         </form>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* ── Mobile top bar ── */}
+      <div className="md:hidden fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4">
+        <Link href="/" className="text-sm font-semibold text-gray-900">
+          CommonCredit
+        </Link>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="rounded-md p-2 text-gray-500 hover:bg-gray-100"
+          aria-label="Open menu"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      {/* ── Mobile overlay backdrop ── */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar — fixed drawer on mobile, static on desktop ── */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white transition-transform duration-200 ease-in-out
+          md:static md:z-auto md:w-56 md:translate-x-0 md:transition-none
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {navContent}
+      </aside>
+    </>
   )
 }
