@@ -7,8 +7,8 @@ async function getInvoices(memberId: string) {
   return prisma.invoice.findMany({
     where: { OR: [{ sellerId: memberId }, { buyerId: memberId }] },
     include: {
-      seller: { select: { id: true, name: true } },
-      buyer: { select: { id: true, name: true } },
+      seller: { select: { id: true, displayName: true } },
+      buyer: { select: { id: true, displayName: true } },
     },
     orderBy: { createdAt: "desc" },
   })
@@ -105,7 +105,7 @@ function Section({
                   >
                     <td className="px-4 py-3 font-medium text-gray-900">
                       <a href={`/invoices/${inv.id}`} className="hover:underline">
-                        {counterparty.name}
+                        {counterparty.displayName}
                       </a>
                     </td>
                     <td className="max-w-xs truncate px-4 py-3 text-gray-600">

@@ -31,7 +31,7 @@ export default async function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
         <p className="mt-0.5 text-sm text-gray-500">
-          Welcome back, {member?.name ?? session?.user.name ?? "member"}.
+          Welcome back, {member?.displayName ?? session?.user.name ?? "member"}.
         </p>
       </div>
 

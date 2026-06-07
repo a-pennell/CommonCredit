@@ -7,6 +7,37 @@ datasource db {
 }
 
 // ============================================================
+// IDENTITY SPEC ENUMS
+// Shared across CommonCredit, Stewardship, and Sensemaking.
+// See shared/IDENTITY_SPEC.md for canonical definitions.
+// ============================================================
+
+enum OrgType {
+  COOPERATIVE
+  LAND_TRUST
+  HOUSING_COOP
+  INTENTIONAL_COMMUNITY
+  MUTUAL_AID
+  NONPROFIT
+  INSTITUTION
+  NETWORK
+  OTHER
+}
+
+enum OrgSize {
+  MICRO   // 1–15
+  SMALL   // 16–50
+  MEDIUM  // 51–200
+  LARGE   // 200+
+}
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+// ============================================================
 // ENUMS
 // ============================================================
 
@@ -186,14 +217,65 @@ enum AuditAction {
 }
 
 // ============================================================
+// ORGANIZATION (Identity Spec — canonical top-level tenant)
+// See shared/IDENTITY_SPEC.md
+// ============================================================
+
+model Organization {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  type        OrgType   @default(COOPERATIVE)
+  size        OrgSize   @default(MICRO)
+  status      OrgStatus @default(ACTIVE)
+  // Which products this org has activated
+  products    String[]  @default(["common_credit"])
+  website     String?
+  description String?
+  createdAt   DateTime  @default(now())
+  archivedAt  DateTime?
+
+  members     Member[]
+  creditConfig CreditNetworkConfig?
+
+  @@index([slug])
+  @@index([status])
+}
+
+/// CommonCredit-specific extensions to Organization.
+/// NOT part of the canonical identity spec — CC-only fields live here.
+model CreditNetworkConfig {
+  id                 String       @id @default(uuid())
+  orgId              String       @unique
+  organization       Organization @relation(fields: [orgId], references: [id])
+
+  currencyName       String  @default("CommonCredit")
+  currencySymbol     String  @default("CC")
+  creditUnitBasis    String  @default("USD")        // 1 CC ≈ 1 USD
+  defaultCreditLimit Decimal @default(500)  @db.Decimal(12, 2)
+  defaultDebitLimit  Decimal @default(-200) @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
 // MEMBERSHIP
 // ============================================================
 
 model Member {
-  id        String       @id @default(cuid())
+  id          String       @id @default(cuid())
+  // ── Identity spec fields ──────────────────────────────────
+  orgId       String?
+  organization Organization? @relation(fields: [orgId], references: [id])
+  userId      String?       // Clerk user ID; nullable until Clerk is wired
+  displayName String        @map("name")  // DB column stays 'name' to avoid rename migration
+  avatarUrl   String?
+  timezone    String?       // IANA tz string e.g. "America/Los_Angeles"
+  departedAt  DateTime?
+  // ─────────────────────────────────────────────────────────
   type      MemberType
-  name      String
-  email     String       @unique
+  email     String       @unique   // Will become @@unique([orgId, email]) after orgId is non-null
   bio       String?
   location  String?
   website   String?
@@ -223,6 +305,8 @@ model Member {
   actorAuditLogs       AuditLog[]             @relation("AuditActor")
   subjectAuditLogs     AuditLog[]             @relation("AuditSubject")
 
+  @@index([orgId])
+  @@index([userId])
   @@index([email])
   @@index([status])
 }
@@ -348,6 +432,7 @@ model LedgerEntry {
 
 model Offer {
   id          String      @id @default(cuid())
+  orgId       String?
   memberId    String
   member      Member      @relation(fields: [memberId], references: [id])
 
@@ -365,6 +450,7 @@ model Offer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([orgId])
   @@index([memberId])
   @@index([category])
   @@index([status])
@@ -372,6 +458,7 @@ model Offer {
 
 model Need {
   id       String @id @default(cuid())
+  orgId    String?
   memberId String
   member   Member @relation(fields: [memberId], references: [id])
 
@@ -385,6 +472,7 @@ model Need {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
+  @@index([orgId])
   @@index([memberId])
   @@index([category])
   @@index([status])

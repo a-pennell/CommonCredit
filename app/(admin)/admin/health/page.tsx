@@ -57,7 +57,7 @@ async function getHealthData() {
     }),
 
     prisma.account.findMany({
-      select: { balance: true, memberId: true, member: { select: { name: true } } },
+      select: { balance: true, memberId: true, member: { select: { displayName: true } } },
     }),
 
     prisma.offer.count({ where: { status: "PUBLISHED" } }),
@@ -160,7 +160,7 @@ export default async function HealthPage() {
               <tbody className="divide-y divide-gray-100">
                 {h.topCreditors.map((a) => (
                   <tr key={a.memberId}>
-                    <td className="px-4 py-2.5 text-gray-700">{a.member.name}</td>
+                    <td className="px-4 py-2.5 text-gray-700">{a.member.displayName}</td>
                     <td className="px-4 py-2.5 text-right font-mono text-xs text-green-700">
                       +{Number(a.balance).toFixed(2)} CC
                     </td>
@@ -180,7 +180,7 @@ export default async function HealthPage() {
               <tbody className="divide-y divide-gray-100">
                 {h.topDebtors.map((a) => (
                   <tr key={a.memberId}>
-                    <td className="px-4 py-2.5 text-gray-700">{a.member.name}</td>
+                    <td className="px-4 py-2.5 text-gray-700">{a.member.displayName}</td>
                     <td className="px-4 py-2.5 text-right font-mono text-xs text-red-600">
                       {Number(a.balance).toFixed(2)} CC
                     </td>

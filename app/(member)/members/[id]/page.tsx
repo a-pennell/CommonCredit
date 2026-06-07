@@ -11,12 +11,12 @@ async function getMember(id: string) {
       needs: { where: { status: "PUBLISHED" }, orderBy: { createdAt: "desc" } },
       endorsementsReceived: {
         where: { revokedAt: null },
-        include: { fromMember: { select: { id: true, name: true } } },
+        include: { fromMember: { select: { id: true, displayName: true } } },
         orderBy: { createdAt: "desc" },
       },
       reputationReceived: {
         orderBy: { createdAt: "desc" },
-        include: { fromMember: { select: { name: true } } },
+        include: { fromMember: { select: { displayName: true } } },
       },
     },
   })
@@ -96,7 +96,7 @@ export default async function MemberProfilePage({
         {/* Header */}
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{member.name}</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">{member.displayName}</h1>
             <p className="mt-0.5 text-sm text-gray-500 capitalize">
               {member.type.toLowerCase()}
               {member.location ? ` · ${member.location}` : ""}
@@ -213,7 +213,7 @@ export default async function MemberProfilePage({
                 <div key={e.id} className="rounded-lg border border-gray-200 bg-white p-4">
                   <p className="text-sm text-gray-700">&ldquo;{e.body}&rdquo;</p>
                   <p className="mt-1.5 text-xs text-gray-400">
-                    — {e.fromMember.name}
+                    — {e.fromMember.displayName}
                   </p>
                 </div>
               ))}
@@ -242,14 +242,14 @@ export default async function MemberProfilePage({
                     name="body"
                     required
                     rows={3}
-                    placeholder={`Write an endorsement for ${member.name}…`}
+                    placeholder={`Write an endorsement for ${member.displayName}…`}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                   />
                   <button
                     type="submit"
                     className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
                   >
-                    Endorse {member.name}
+                    Endorse {member.displayName}
                   </button>
                 </form>
               )}
@@ -273,7 +273,7 @@ export default async function MemberProfilePage({
                     {r.comment && (
                       <p className="text-sm text-gray-700">{r.comment}</p>
                     )}
-                    <p className="text-xs text-gray-400">— {r.fromMember.name}</p>
+                    <p className="text-xs text-gray-400">— {r.fromMember.displayName}</p>
                   </div>
                 </div>
               ))}

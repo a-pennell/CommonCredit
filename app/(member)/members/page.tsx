@@ -1,8 +1,9 @@
+import { requireMemberSession } from "@/lib/session"
 import { prisma } from "@/lib/db"
 
-async function getMembers() {
+async function getMembers(orgId: string) {
   const members = await prisma.member.findMany({
-    where: { status: "APPROVED" },
+    where: { orgId, status: "APPROVED" },
     include: {
       account: { select: { balance: true } },
       offers: {
@@ -32,7 +33,8 @@ async function getMembers() {
 }
 
 export default async function MembersPage() {
-  const members = await getMembers()
+  const { orgId } = await requireMemberSession()
+  const members = await getMembers(orgId)
 
   return (
     <div className="p-8">
@@ -54,7 +56,7 @@ export default async function MembersPage() {
             {/* Header */}
             <div className="mb-2 flex items-start justify-between gap-2">
               <div>
-                <p className="font-medium text-gray-900">{m.name}</p>
+                <p className="font-medium text-gray-900">{m.displayName}</p>
                 <p className="text-xs text-gray-400 capitalize">
                   {m.type.toLowerCase()}
                   {m.location ? ` · ${m.location}` : ""}

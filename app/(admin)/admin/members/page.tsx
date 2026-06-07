@@ -1,8 +1,10 @@
+import { requireAdminSession } from "@/lib/session"
 import { prisma } from "@/lib/db"
+import { auth } from "@/lib/auth"
 
-async function getMembers() {
+async function getMembers(orgId: string | null | undefined) {
   return prisma.member.findMany({
-    where: { status: "APPROVED" },
+    where: { status: "APPROVED", ...(orgId ? { orgId } : {}) },
     include: {
       account: { select: { balance: true, status: true } },
     },
@@ -11,7 +13,10 @@ async function getMembers() {
 }
 
 export default async function MembersPage() {
-  const members = await getMembers()
+  await requireAdminSession()
+  const session = await auth()
+  const orgId = session?.user.orgId
+  const members = await getMembers(orgId)
 
   return (
     <div className="p-8">
@@ -50,7 +55,7 @@ export default async function MembersPage() {
                 return (
                   <tr key={m.id} className="text-sm hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      {m.name}
+                      {m.displayName}
                     </td>
                     <td className="px-4 py-3 text-gray-500">{m.email}</td>
                     <td className="px-4 py-3">

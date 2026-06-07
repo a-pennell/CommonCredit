@@ -131,7 +131,7 @@ export default async function ApplicationsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-gray-900">
-                      {app.member.name}
+                      {app.member.displayName}
                     </p>
                     <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 uppercase">
                       {app.member.type.toLowerCase()}

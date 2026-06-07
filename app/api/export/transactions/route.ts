@@ -16,8 +16,8 @@ export async function GET() {
   const transactions = await prisma.transaction.findMany({
     where: { status: "POSTED" },
     include: {
-      payerAccount: { include: { member: { select: { name: true, email: true } } } },
-      payeeAccount: { include: { member: { select: { name: true, email: true } } } },
+      payerAccount: { include: { member: { select: { displayName: true, email: true } } } },
+      payeeAccount: { include: { member: { select: { displayName: true, email: true } } } },
     },
     orderBy: { createdAt: "asc" },
   })
@@ -40,9 +40,9 @@ export async function GET() {
   const rows = transactions.map((tx) => {
     const cols = [
       new Date(tx.createdAt).toISOString().slice(0, 10),
-      tx.payerAccount.member.name,
+      tx.payerAccount.member.displayName,
       tx.payerAccount.member.email,
-      tx.payeeAccount.member.name,
+      tx.payeeAccount.member.displayName,
       tx.payeeAccount.member.email,
       `"${tx.description.replace(/"/g, '""')}"`,
       Number(tx.creditAmount).toFixed(2),

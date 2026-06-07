@@ -41,7 +41,7 @@ function toAdapterUser(member: Member): AdapterUser {
   return {
     id: member.id,
     email: member.email,
-    name: member.name,
+    name: member.displayName,
     emailVerified: member.joinedAt,
     image: null,
   }

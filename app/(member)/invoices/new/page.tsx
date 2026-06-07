@@ -11,8 +11,8 @@ export default async function NewInvoicePage() {
   // Fetch all approved members except self to populate buyer dropdown
   const members = await prisma.member.findMany({
     where: { status: "APPROVED", id: { not: memberId } },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    orderBy: { displayName: "asc" },
+    select: { id: true, displayName: true },
   })
 
   async function createInvoice(formData: FormData) {
@@ -78,7 +78,7 @@ export default async function NewInvoicePage() {
                 <option value="">Select member…</option>
                 {members.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name}
+                    {m.displayName}
                   </option>
                 ))}
               </select>

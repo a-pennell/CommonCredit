@@ -249,13 +249,13 @@ export default async function InvoicePage({
           <div>
             <p className="text-xs font-medium text-gray-400">From</p>
             <p className="mt-0.5 text-sm font-medium text-gray-900">
-              {invoice.seller.name}
+              {invoice.seller.displayName}
             </p>
           </div>
           <div>
             <p className="text-xs font-medium text-gray-400">To</p>
             <p className="mt-0.5 text-sm font-medium text-gray-900">
-              {invoice.buyer.name}
+              {invoice.buyer.displayName}
             </p>
           </div>
         </div>

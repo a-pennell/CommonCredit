@@ -7,9 +7,9 @@ async function getProposal(id: string) {
   return prisma.proposal.findUnique({
     where: { id },
     include: {
-      proposer: { select: { id: true, name: true } },
+      proposer: { select: { id: true, displayName: true } },
       votes: {
-        include: { voter: { select: { id: true, name: true } } },
+        include: { voter: { select: { id: true, displayName: true } } },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -168,7 +168,7 @@ export default async function ProposalPage({
             <StatusBadge status={proposal.status} />
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            Proposed by {proposal.proposer.name} ·{" "}
+            Proposed by {proposal.proposer.displayName} ·{" "}
             {new Date(proposal.createdAt).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",

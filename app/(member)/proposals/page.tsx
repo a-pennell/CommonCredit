@@ -1,6 +1,5 @@
-import { auth } from "@/lib/auth"
+import { requireMemberSession } from "@/lib/session"
 import { prisma } from "@/lib/db"
-import { redirect } from "next/navigation"
 import type { Route } from "next"
 
 const STATUS_STYLES: Record<string, string> = {
@@ -22,14 +21,13 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export default async function ProposalsPage() {
-  const session = await auth()
-  const memberId = session?.user.memberId
-  if (!memberId) redirect("/login" as Route)
+  const { memberId, orgId } = await requireMemberSession()
 
   const proposals = await prisma.proposal.findMany({
-    where: { status: { not: "ARCHIVED" } },
+    // Scope via proposer relation until Proposal gets a direct orgId column
+    where: { status: { not: "ARCHIVED" }, proposer: { orgId } },
     include: {
-      proposer: { select: { name: true } },
+      proposer: { select: { displayName: true } },
       votes: { select: { id: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -98,7 +96,7 @@ function ProposalList({
     id: string
     title: string
     status: string
-    proposer: { name: string }
+    proposer: { displayName: string }
     votes: Array<{ id: string }>
     createdAt: Date
     votingDeadline: Date | null
@@ -119,7 +117,7 @@ function ProposalList({
           <div className="min-w-0">
             <p className="font-medium text-gray-900">{p.title}</p>
             <p className="mt-0.5 text-xs text-gray-500">
-              Proposed by {p.proposer.name} ·{" "}
+              Proposed by {p.proposer.displayName} ·{" "}
               {new Date(p.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",

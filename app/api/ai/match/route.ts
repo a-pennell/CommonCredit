@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   const [member, myNeeds, allOffers] = await Promise.all([
     prisma.member.findUniqueOrThrow({
       where: { id: memberId },
-      select: { name: true, bio: true },
+      select: { displayName: true, bio: true },
     }),
     prisma.need.findMany({
       where: { memberId, status: "PUBLISHED" },
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     }),
     prisma.offer.findMany({
       where: { status: "PUBLISHED", memberId: { not: memberId } },
-      include: { member: { select: { name: true, id: true } } },
+      include: { member: { select: { displayName: true, id: true } } },
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
@@ -59,13 +59,13 @@ export async function POST(req: Request) {
   const offersText = allOffers
     .map(
       (o) =>
-        `[${o.id.slice(-6)}] ${o.member.name} — "${o.title}" (${o.category}): ${o.description} | ${Number(o.price) > 0 ? `${Number(o.price)} CC${o.priceUnit === "CC_PER_HOUR" ? "/hr" : ""}` : "Negotiable"}`,
+        `[${o.id.slice(-6)}] ${o.member.displayName} — "${o.title}" (${o.category}): ${o.description} | ${Number(o.price) > 0 ? `${Number(o.price)} CC${o.priceUnit === "CC_PER_HOUR" ? "/hr" : ""}` : "Negotiable"}`,
     )
     .join("\n")
 
   const prompt = `You are the matching assistant for CommonCredit, a mutual credit network. Your job is to help members find relevant offers that meet their published needs.
 
-MEMBER: ${member.name}
+MEMBER: ${member.displayName}
 BIO: ${member.bio ?? "Not provided"}
 
 THEIR NEEDS:

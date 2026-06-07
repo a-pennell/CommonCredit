@@ -4,8 +4,8 @@ async function getTransactions(status?: string) {
   return prisma.transaction.findMany({
     where: status ? { status: status as "POSTED" | "PENDING" | "DRAFT" | "REVERSED" } : {},
     include: {
-      payerAccount: { include: { member: { select: { name: true } } } },
-      payeeAccount: { include: { member: { select: { name: true } } } },
+      payerAccount: { include: { member: { select: { displayName: true } } } },
+      payeeAccount: { include: { member: { select: { displayName: true } } } },
     },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -134,10 +134,10 @@ export default async function AdminTransactionsPage({
                   })}
                 </td>
                 <td className="px-4 py-2.5 text-gray-700">
-                  {tx.payerAccount.member.name}
+                  {tx.payerAccount.member.displayName}
                 </td>
                 <td className="px-4 py-2.5 text-gray-700">
-                  {tx.payeeAccount.member.name}
+                  {tx.payeeAccount.member.displayName}
                 </td>
                 <td className="max-w-[200px] truncate px-4 py-2.5 text-gray-600">
                   {tx.description}

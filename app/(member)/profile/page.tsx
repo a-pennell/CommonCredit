@@ -66,7 +66,7 @@ export default async function ProfilePage({
             Identity
           </p>
           <dl className="space-y-2 text-sm">
-            <Row label="Name" value={member.name} />
+            <Row label="Name" value={member.displayName} />
             <Row label="Email" value={member.email} />
             <Row
               label="Member type"

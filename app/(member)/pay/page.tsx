@@ -3,6 +3,7 @@
  * Creates a PENDING Transaction (no Invoice). The payee confirms via
  * the Transactions page to post it to the ledger.
  */
+import { requireMemberSession } from "@/lib/session"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
@@ -13,17 +14,14 @@ export default async function PayPage({
 }: {
   searchParams: Promise<{ to?: string; error?: string }>
 }) {
-  const session = await auth()
-  const memberId = session?.user.memberId
-  if (!memberId) redirect("/login" as Route)
-
+  const { memberId, orgId } = await requireMemberSession()
   const params = await searchParams
 
   const account = await prisma.account.findUnique({ where: { memberId } })
   const members = await prisma.member.findMany({
-    where: { status: "APPROVED", id: { not: memberId } },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    where: { orgId, status: "APPROVED", id: { not: memberId } },
+    orderBy: { displayName: "asc" },
+    select: { id: true, displayName: true },
   })
 
   async function send(formData: FormData) {
@@ -121,7 +119,7 @@ export default async function PayPage({
               <option value="">Select member…</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.name}
+                  {m.displayName}
                 </option>
               ))}
             </select>

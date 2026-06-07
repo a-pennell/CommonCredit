@@ -59,6 +59,13 @@ const adminSections = [
     ],
   },
   {
+    label: "Governance",
+    items: [
+      { href: "/proposals", label: "Proposals" },
+      { href: "/admin/treasury", label: "Treasury" },
+    ],
+  },
+  {
     label: "Operations",
     items: [
       { href: "/admin/disputes", label: "Disputes" },

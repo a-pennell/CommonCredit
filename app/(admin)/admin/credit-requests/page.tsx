@@ -87,7 +87,7 @@ export default async function CreditRequestsPage() {
               <div key={req.id} className="rounded-lg border border-gray-200 bg-white p-5">
                 <div className="mb-4 flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">{req.member.name}</p>
+                    <p className="font-medium text-gray-900">{req.member.displayName}</p>
                     <p className="text-xs text-gray-500">{req.member.email}</p>
                     <p className="mt-0.5 text-xs text-gray-400">
                       Submitted {new Date(req.createdAt).toLocaleDateString("en-US", {

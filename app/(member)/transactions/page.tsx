@@ -9,8 +9,8 @@ async function getLedger(accountId: string) {
     include: {
       transaction: {
         include: {
-          payerAccount: { include: { member: { select: { id: true, name: true } } } },
-          payeeAccount: { include: { member: { select: { id: true, name: true } } } },
+          payerAccount: { include: { member: { select: { id: true, displayName: true } } } },
+          payeeAccount: { include: { member: { select: { id: true, displayName: true } } } },
         },
       },
     },
@@ -22,7 +22,7 @@ async function getPendingReceived(accountId: string) {
   return prisma.transaction.findMany({
     where: { payeeAccountId: accountId, status: "PENDING" },
     include: {
-      payerAccount: { include: { member: { select: { name: true } } } },
+      payerAccount: { include: { member: { select: { displayName: true } } } },
     },
     orderBy: { createdAt: "desc" },
   })
@@ -32,7 +32,7 @@ async function getPendingSent(accountId: string) {
   return prisma.transaction.findMany({
     where: { payerAccountId: accountId, status: "PENDING" },
     include: {
-      payeeAccount: { include: { member: { select: { name: true } } } },
+      payeeAccount: { include: { member: { select: { displayName: true } } } },
     },
     orderBy: { createdAt: "desc" },
   })
@@ -205,7 +205,7 @@ export default async function TransactionsPage() {
             {pendingReceived.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{tx.payerAccount.member.name}</p>
+                  <p className="text-sm font-medium text-gray-900">{tx.payerAccount.member.displayName}</p>
                   <p className="truncate text-xs text-gray-500">{tx.description}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ export default async function TransactionsPage() {
             {pendingSent.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{tx.payeeAccount.member.name}</p>
+                  <p className="text-sm font-medium text-gray-900">{tx.payeeAccount.member.displayName}</p>
                   <p className="truncate text-xs text-gray-500">{tx.description}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -289,8 +289,8 @@ export default async function TransactionsPage() {
                 const amount = isDebit ? Number(e.debit) : Number(e.credit)
                 const isSelf = tx.payerAccount.memberId === memberId
                 const counterparty = isSelf
-                  ? tx.payeeAccount.member.name
-                  : tx.payerAccount.member.name
+                  ? tx.payeeAccount.member.displayName
+                  : tx.payerAccount.member.displayName
 
                 return (
                   <tr key={e.id} className="text-sm">

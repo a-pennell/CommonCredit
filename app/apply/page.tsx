@@ -41,7 +41,7 @@ async function ApplyForm({
     await prisma.member.create({
       data: {
         email,
-        name,
+        displayName: name,
         type: type as
           | "INDIVIDUAL"
           | "BUSINESS"

@@ -9,11 +9,11 @@ async function getDispute(id: string) {
     include: {
       transaction: {
         include: {
-          payerAccount: { include: { member: { select: { id: true, name: true } } } },
-          payeeAccount: { include: { member: { select: { id: true, name: true } } } },
+          payerAccount: { include: { member: { select: { id: true, displayName: true } } } },
+          payeeAccount: { include: { member: { select: { id: true, displayName: true } } } },
         },
       },
-      openedBy: { select: { id: true, name: true } },
+      openedBy: { select: { id: true, displayName: true } },
       evidence: { orderBy: { createdAt: "asc" } },
       decisions: { orderBy: { createdAt: "desc" } },
     },
@@ -52,7 +52,7 @@ export default async function DisputePage({
 
     const member = await prisma.member.findUniqueOrThrow({
       where: { id: memberId },
-      select: { name: true },
+      select: { displayName: true },
     })
     const content = (formData.get("content") as string).trim()
     if (!content) redirect(`/disputes/${id}` as Route)
@@ -62,7 +62,7 @@ export default async function DisputePage({
         data: {
           disputeId: id,
           submittedById: memberId,
-          submitterName: member.name,
+          submitterName: member.displayName,
           content,
         },
       }),
@@ -142,7 +142,7 @@ export default async function DisputePage({
           <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Transaction in dispute</p>
           <p className="text-sm font-medium text-gray-900">{tx.description}</p>
           <p className="mt-1 text-xs text-gray-500">
-            {tx.payerAccount.member.name} → {tx.payeeAccount.member.name} ·{" "}
+            {tx.payerAccount.member.displayName} → {tx.payeeAccount.member.displayName} ·{" "}
             {Number(tx.creditAmount).toFixed(2)} CC ·{" "}
             {dispute.type.replace(/_/g, " ").toLowerCase()}
           </p>

@@ -29,17 +29,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user?.email) {
         const member = await prisma.member.findUnique({
           where: { email: user.email },
-          select: { id: true },
+          select: { id: true, orgId: true },
         })
         token.memberId = member?.id ?? null
-        token.role = adminEmails.includes(user.email) ? "admin" : "member"
+        token.orgId   = member?.orgId ?? null
+        token.role    = adminEmails.includes(user.email) ? "admin" : "member"
       }
       return token
     },
 
     async session({ session, token }) {
       session.user.memberId = (token.memberId as string) ?? null
-      session.user.role = (token.role as "admin" | "member") ?? "member"
+      session.user.orgId    = (token.orgId as string) ?? null
+      session.user.role     = (token.role as "admin" | "member") ?? "member"
       return session
     },
   },

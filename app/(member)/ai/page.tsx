@@ -16,7 +16,7 @@ interface Match {
     priceUnit: string
     category: string
     availability: string | null
-    member: { id: string; name: string }
+    member: { id: string; displayName: string }
   }
 }
 
@@ -138,7 +138,7 @@ export default function AiMatchPage() {
                             {m.offer.title}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {m.offer.member.name}
+                            {m.offer.member.displayName}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">

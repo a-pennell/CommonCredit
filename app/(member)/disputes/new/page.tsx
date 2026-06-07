@@ -35,8 +35,8 @@ export default async function NewDisputePage({
           ],
         },
         include: {
-          payerAccount: { include: { member: { select: { name: true } } } },
-          payeeAccount: { include: { member: { select: { name: true } } } },
+          payerAccount: { include: { member: { select: { displayName: true } } } },
+          payeeAccount: { include: { member: { select: { displayName: true } } } },
         },
         orderBy: { createdAt: "desc" },
         take: 50,
@@ -73,7 +73,7 @@ export default async function NewDisputePage({
 
     const member = await prisma.member.findUniqueOrThrow({
       where: { id: openedById },
-      select: { name: true },
+      select: { displayName: true },
     })
 
     const dispute = await prisma.dispute.create({
@@ -90,7 +90,7 @@ export default async function NewDisputePage({
         evidence: {
           create: {
             submittedById: openedById,
-            submitterName: member.name,
+            submitterName: member.displayName,
             content: initialEvidence,
           },
         },
@@ -134,8 +134,8 @@ export default async function NewDisputePage({
               {transactions.map((tx) => {
                 const isSelf = tx.payerAccount.memberId === memberId
                 const other = isSelf
-                  ? tx.payeeAccount.member.name
-                  : tx.payerAccount.member.name
+                  ? tx.payeeAccount.member.displayName
+                  : tx.payerAccount.member.displayName
                 return (
                   <option key={tx.id} value={tx.id}>
                     {Number(tx.creditAmount).toFixed(0)} CC{" "}

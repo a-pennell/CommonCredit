@@ -184,7 +184,7 @@ async function main() {
   for (const def of memberDefs) {
     const m = await prisma.member.create({
       data: {
-        name: def.name,
+        displayName: def.name,
         email: def.email,
         type: def.type,
         bio: def.bio,
@@ -218,7 +218,7 @@ async function main() {
     include: { member: true },
   })
   const acct = (name: string) => {
-    const a = accounts.find((a) => a.member.name === name)
+    const a = accounts.find((a) => a.member.displayName === name)
     if (!a) throw new Error(`Account not found for ${name}`)
     return a.id
   }

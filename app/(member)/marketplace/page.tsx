@@ -1,3 +1,4 @@
+import { requireMemberSession } from "@/lib/session"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
@@ -14,24 +15,24 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: "Other",
 }
 
-async function getData(tab: string, category: string, memberId: string) {
+async function getData(tab: string, category: string, memberId: string, orgId: string) {
   const categoryFilter = category ? { category } : {}
   const [offers, needs, myOffers, myNeeds] = await Promise.all([
     tab !== "needs"
       ? prisma.offer.findMany({
-          where: { status: "PUBLISHED", ...categoryFilter },
-          include: { member: { select: { id: true, name: true } } },
+          where: { orgId, status: "PUBLISHED", ...categoryFilter },
+          include: { member: { select: { id: true, displayName: true } } },
           orderBy: { createdAt: "desc" },
         })
       : [],
     tab !== "offers"
       ? prisma.need.findMany({
-          where: { status: "PUBLISHED", ...categoryFilter },
-          include: { member: { select: { id: true, name: true } } },
+          where: { orgId, status: "PUBLISHED", ...categoryFilter },
+          include: { member: { select: { id: true, displayName: true } } },
           orderBy: { createdAt: "desc" },
         })
       : [],
-    // My listings — always fetch regardless of filter
+    // My listings — always scoped to the member (which is already org-scoped)
     prisma.offer.findMany({
       where: { memberId, status: { in: ["PUBLISHED", "DRAFT"] } },
       orderBy: { createdAt: "desc" },
@@ -49,8 +50,7 @@ export default async function MarketplacePage({
 }: {
   searchParams: Promise<{ tab?: string; category?: string; view?: string }>
 }) {
-  const session = await auth()
-  const memberId = session?.user.memberId ?? ""
+  const { memberId, orgId } = await requireMemberSession()
   const params = await searchParams
   const tab = params.tab ?? "offers"
   const category = params.category ?? ""
@@ -60,6 +60,7 @@ export default async function MarketplacePage({
     tab,
     category,
     memberId,
+    orgId,
   )
 
   async function unpublishOffer(formData: FormData) {
@@ -234,7 +235,7 @@ export default async function MarketplacePage({
                           href={`/members/${o.member.id}`}
                           className="mt-0.5 block text-xs text-gray-500 hover:underline"
                         >
-                          {o.member.name}
+                          {o.member.displayName}
                         </a>
                       </div>
                       <PriceBadge
@@ -283,7 +284,7 @@ export default async function MarketplacePage({
                     href={`/members/${n.member.id}`}
                     className="mt-0.5 block text-xs text-gray-500 hover:underline"
                   >
-                    {n.member.name}
+                    {n.member.displayName}
                   </a>
                   <p className="mt-2 flex-1 text-sm text-gray-600 leading-relaxed line-clamp-3">
                     {n.description}

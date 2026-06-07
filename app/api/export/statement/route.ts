@@ -23,8 +23,8 @@ export async function GET() {
     include: {
       transaction: {
         include: {
-          payerAccount: { include: { member: { select: { name: true } } } },
-          payeeAccount: { include: { member: { select: { name: true } } } },
+          payerAccount: { include: { member: { select: { displayName: true } } } },
+          payeeAccount: { include: { member: { select: { displayName: true } } } },
         },
       },
     },
@@ -40,8 +40,8 @@ export async function GET() {
     const tx = e.transaction
     const isSelf = tx.payerAccount.memberId === memberId
     const counterparty = isSelf
-      ? tx.payeeAccount.member.name
-      : tx.payerAccount.member.name
+      ? tx.payeeAccount.member.displayName
+      : tx.payerAccount.member.displayName
 
     return [
       new Date(e.postedAt).toISOString().slice(0, 10),
@@ -69,9 +69,9 @@ export async function GET() {
   const csv = [header, ...rows].join("\n")
   const member = await prisma.member.findUnique({
     where: { id: memberId },
-    select: { name: true },
+    select: { displayName: true },
   })
-  const slug = member?.name.toLowerCase().replace(/\s+/g, "-") ?? "member"
+  const slug = member?.displayName.toLowerCase().replace(/\s+/g, "-") ?? "member"
   const filename = `commoncredit-statement-${slug}-${new Date().toISOString().slice(0, 10)}.csv`
 
   return new Response(csv, {

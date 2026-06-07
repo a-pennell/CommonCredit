@@ -4,11 +4,11 @@ export default async function AdminDisputesPage() {
   const disputes = await prisma.dispute.findMany({
     where: { status: { not: "CLOSED" } },
     include: {
-      openedBy: { select: { name: true } },
+      openedBy: { select: { displayName: true } },
       transaction: {
         include: {
-          payerAccount: { include: { member: { select: { name: true } } } },
-          payeeAccount: { include: { member: { select: { name: true } } } },
+          payerAccount: { include: { member: { select: { displayName: true } } } },
+          payeeAccount: { include: { member: { select: { displayName: true } } } },
         },
       },
       evidence: { select: { id: true } },
@@ -51,12 +51,12 @@ export default async function AdminDisputesPage() {
                   {d.transaction.description}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-500">
-                  {d.transaction.payerAccount.member.name} →{" "}
-                  {d.transaction.payeeAccount.member.name} ·{" "}
+                  {d.transaction.payerAccount.member.displayName} →{" "}
+                  {d.transaction.payeeAccount.member.displayName} ·{" "}
                   {Number(d.transaction.creditAmount).toFixed(0)} CC
                 </p>
                 <p className="mt-0.5 text-xs text-gray-400">
-                  Opened by {d.openedBy.name} ·{" "}
+                  Opened by {d.openedBy.displayName} ·{" "}
                   {d.type.replace(/_/g, " ").toLowerCase()} ·{" "}
                   {d.evidence.length} evidence item{d.evidence.length !== 1 ? "s" : ""}
                 </p>
